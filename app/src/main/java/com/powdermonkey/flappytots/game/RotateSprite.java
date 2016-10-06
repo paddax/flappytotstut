@@ -5,7 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 
+import com.powdermonkey.flappytots.ISprite;
+
 /**
+ * Creates an animated rotatable image from a single image.
+ *
  * Created by Peter Davis on 05/10/2016.
  */
 
@@ -13,6 +17,13 @@ public class RotateSprite implements ISprite {
 
     private final Bitmap[] images;
 
+    /**
+     * The src bitmap is rescaled too width and height
+     * @param src Source bitmap
+     * @param width Width of final bitmap
+     * @param height Height of final bitmap
+     * @param frames Number of frames to generate
+     */
     public RotateSprite(Bitmap src, int width, int height, int frames) {
         images = new Bitmap[frames];
         Matrix matrix = new Matrix();

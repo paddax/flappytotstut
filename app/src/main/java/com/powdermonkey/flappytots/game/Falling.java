@@ -1,16 +1,18 @@
 package com.powdermonkey.flappytots.game;
 
+import com.powdermonkey.flappytots.I2DPhysics;
+
 /**
  * Created by Peter Davis on 05/10/2016.
  */
 
-public class FallingFlower {
+public class Falling implements I2DPhysics {
     private long ts;
     private float x, y;
     private float vx, vy;
     private int frame = 0;
 
-    public FallingFlower(float x, float y) {
+    public Falling(float x, float y) {
         this.x = x;
         this.y = y;
         vx = 0;
@@ -18,6 +20,7 @@ public class FallingFlower {
         ts = System.currentTimeMillis();
     }
 
+    @Override
     public void update(long ts) {
         //pseudo acceleration due to gravity
         vy = vy + ((ts - this.ts) / 100.0f);
@@ -27,14 +30,17 @@ public class FallingFlower {
         y += vy;
     }
 
+    @Override
     public float getX() {
         return x;
     }
 
+    @Override
     public float getY() {
         return y;
     }
 
+    @Override
     public int getFrame() {
         return frame;
     }

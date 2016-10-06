@@ -5,10 +5,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.powdermonkey.flappytots.I2DPhysics;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,8 +26,11 @@ import flappytots.powdermonkey.com.flappytots.R;
 public class GameView extends SurfaceView implements Runnable {
     private final Paint paint;
     private final RotateSprite flower;
-    private final ArrayList<FallingFlower> flowers;
+    private final ArrayList<I2DPhysics> flowers;
     private final SurfaceHolder holder;
+    public int surfaceHeight;
+    public int surfaceWidth;
+
 
     private boolean playing;
     private float framesPerSecond;
@@ -33,12 +40,29 @@ public class GameView extends SurfaceView implements Runnable {
 
     public GameView(Context context) {
         super(context);
-
         // Initialize ourHolder and paint objects
         holder = getHolder();
         paint = new Paint();
         flower = new RotateSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.flower), 220, 220, 90);
         flowers = new ArrayList<>();
+
+        holder.addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                surfaceWidth = width;
+                surfaceHeight = height;
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+
+            }
+        });
     }
 
     @Override
@@ -71,8 +95,7 @@ public class GameView extends SurfaceView implements Runnable {
         if (holder.getSurface().isValid()) {
             // Lock the canvas ready to draw
             Canvas canvas = holder.lockCanvas();
-            long time = System.currentTimeMillis();
-            canvas.drawColor(Color.argb(255,  99, 99, 99)); // Draw the background color
+            canvas.drawColor(Color.argb(255,  66, 220, 120)); // Draw the background color
             paint.setTextSize(45);
             paint.setDither(true);
             paint.setAntiAlias(true);
@@ -81,17 +104,12 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawText("FPS:" + Math.round(framesPerSecond) + " " + flowers.size(), 20, 40, paint);
 
             synchronized (flowers) {
-                for (Iterator<FallingFlower> iterator = flowers.iterator(); iterator.hasNext(); ) {
-                    FallingFlower fcf = iterator.next();
-                    fcf.update(time);
-                    flower.draw(canvas, (int) fcf.getX(), (int) fcf.getY(), paint, fcf.getFrame());
-                    if (fcf.getY() > canvas.getHeight() + flower.getHeight(fcf.getFrame())) {
-                        iterator.remove();
-                    }
+                for (I2DPhysics ff : flowers) {
+                    //paint.setAlpha(somefunction);
+                    flower.draw(canvas, (int) ff.getX(), (int) ff.getY(), paint, ff.getFrame());
                 }
             }
 
-            frame++;
             // Draw everything to the screen
             holder.unlockCanvasAndPost(canvas);
         }
@@ -102,9 +120,21 @@ public class GameView extends SurfaceView implements Runnable {
      * Runs the game logic updating position and state of all players
      */
     private void update() {
+        long time = System.currentTimeMillis();
+        synchronized (flowers) {
+            for (Iterator<I2DPhysics> iterator = flowers.iterator(); iterator.hasNext(); ) {
+                I2DPhysics fcf = iterator.next();
+                fcf.update(time);
+                if (fcf.getY() > surfaceHeight + flower.getHeight(fcf.getFrame())) {
+                    iterator.remove();
+                }
+            }
+        }
+
+        frame++;
     }
 
-    // If SimpleGameEngine Activity is paused/stopped
+    // If Game Activity is paused/stopped
     // shutdown our thread.
     public void pause() {
         playing = false;
@@ -117,7 +147,7 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
 
-    // If SimpleGameEngine Activity is started theb
+    // If Game Activity is started
     // start our thread.
     public void resume() {
         playing = true;
@@ -125,23 +155,20 @@ public class GameView extends SurfaceView implements Runnable {
         gameThread.start();
     }
 
-
-    float lastX, lastY;
     @Override
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                float x = motionEvent.getX();
-                float y = motionEvent.getY();
-                if(Math.abs(lastX - motionEvent.getX()) > 5 && Math.abs(lastY - motionEvent.getY()) > 5) {
-                    lastX = x;
-                    lastY = y;
+    public boolean onTouchEvent(MotionEvent event) {
+        for (int i = 0; i < event.getPointerCount(); i++) {
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_POINTER_DOWN:
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                    float x = event.getX(i);
+                    float y = event.getY(i);
                     synchronized (flowers) {
-                        FallingFlower fcf = new FallingFlower(x, y);
+                        I2DPhysics fcf = new Falling(x, y);
                         flowers.add(fcf);
                     }
-                }
+            }
 
         }
         return true;
