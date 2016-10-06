@@ -1,5 +1,7 @@
 package com.powdermonkey.flappytots;
 
+import android.graphics.PointF;
+
 /**
  * Created by Peter Davis on 06/10/2016.
  */
@@ -12,20 +14,20 @@ public interface I2DPhysics {
     void update(long ts);
 
     /**
-     * Location X of object
-     * @return curent x
+     * Location of object
+     * @return curent location
      */
-    float getX();
+    PointF getPoint();
+
+    PointF getVector();
+
+    void setVector(float x, float y);
 
     /**
-     * Location Y of object
-     * @return current y
-     */
-    float getY();
-
     /**
      * Current frame where a number of frames represent the object
      * @return current frame
      */
     int getFrame();
+
 }

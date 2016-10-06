@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
@@ -95,7 +96,7 @@ public class GameView extends SurfaceView implements Runnable {
         if (holder.getSurface().isValid()) {
             // Lock the canvas ready to draw
             Canvas canvas = holder.lockCanvas();
-            canvas.drawColor(Color.argb(255,  66, 220, 120)); // Draw the background color
+            canvas.drawColor(Color.argb(255, 66, 220, 120)); // Draw the background color
             paint.setTextSize(45);
             paint.setDither(true);
             paint.setAntiAlias(true);
@@ -106,7 +107,8 @@ public class GameView extends SurfaceView implements Runnable {
             synchronized (flowers) {
                 for (I2DPhysics ff : flowers) {
                     //paint.setAlpha(somefunction);
-                    flower.draw(canvas, (int) ff.getX(), (int) ff.getY(), paint, ff.getFrame());
+                    PointF p = ff.getPoint();
+                    flower.draw(canvas, p.x, p.y, paint, ff.getFrame());
                 }
             }
 
@@ -125,7 +127,7 @@ public class GameView extends SurfaceView implements Runnable {
             for (Iterator<I2DPhysics> iterator = flowers.iterator(); iterator.hasNext(); ) {
                 I2DPhysics fcf = iterator.next();
                 fcf.update(time);
-                if (fcf.getY() > surfaceHeight + flower.getHeight(fcf.getFrame())) {
+                if (fcf.getPoint().y > surfaceHeight + flower.getHeight(fcf.getFrame())) {
                     iterator.remove();
                 }
             }
@@ -167,10 +169,36 @@ public class GameView extends SurfaceView implements Runnable {
                     synchronized (flowers) {
                         I2DPhysics fcf = new Falling(x, y);
                         flowers.add(fcf);
+                        if(event.getHistorySize() > 1) {
+                            float x1 = event.getHistoricalX(i, 0);
+                            float y1 = event.getHistoricalY(i, 0);
+                            x = x - x1;
+                            y = y - y1;
+                            fcf.setVector(x, y);
+                        }
                     }
             }
 
         }
         return true;
+
+    }
+
+
+    private void printSamples(MotionEvent ev) {
+        final int historySize = ev.getHistorySize();
+        final int pointerCount = ev.getPointerCount();
+        for (int h = 0; h < historySize; h++) {
+            Log.w("TEST", String.format("At historical time %d:", ev.getHistoricalEventTime(h)));
+            for (int p = 0; p < pointerCount; p++) {
+                Log.e("TEST", String.format("  pointer %d: (%f,%f)",
+                        ev.getPointerId(p), ev.getHistoricalX(p, h), ev.getHistoricalY(p, h)));
+            }
+        }
+        Log.w("TEST", String.format("At time %d:", ev.getEventTime()));
+        for (int p = 0; p < pointerCount; p++) {
+            Log.e("TEST", String.format("  pointer %d: (%f,%f)",
+                    ev.getPointerId(p), ev.getX(p), ev.getY(p)));
+        }
     }
 }

@@ -14,7 +14,7 @@ public interface ISprite {
 
     boolean collide(ISprite s);
 
-    void draw(Canvas canvas, int x, int y, Paint paint, int frame);
+    void draw(Canvas canvas, float x, float y, Paint paint, int frame);
 
     int getFrameCount();
 

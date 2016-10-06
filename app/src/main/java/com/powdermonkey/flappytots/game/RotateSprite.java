@@ -40,7 +40,7 @@ public class RotateSprite implements ISprite {
     }
 
     @Override
-    public void draw(Canvas canvas, int x, int y, Paint paint, int frame) {
+    public void draw(Canvas canvas, float x, float y, Paint paint, int frame) {
         int i = frame % images.length;
         canvas.drawBitmap(images[i], x - images[i].getWidth() / 2, y - images[i].getHeight() / 2, paint);
     }
