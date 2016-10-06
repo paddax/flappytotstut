@@ -11,8 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 
-import flappytots.powdermonkey.com.flappytots.R;
-
 public class MenuActivity extends AppCompatActivity {
 
     private Button b;

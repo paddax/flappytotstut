@@ -6,8 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Rect;
-import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -18,9 +16,10 @@ import com.powdermonkey.flappytots.I2DPhysics;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import flappytots.powdermonkey.com.flappytots.R;
+import com.powdermonkey.flappytots.R;
 
 /**
+ * Game view
  * Created by Peter Davis on 05/10/2016.
  */
 
