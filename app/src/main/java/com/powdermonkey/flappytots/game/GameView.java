@@ -26,7 +26,8 @@ import com.powdermonkey.flappytots.R;
 public class GameView extends SurfaceView implements Runnable {
     private final Paint paint;
     private final RotateSprite flower;
-    private final ArrayList<I2DPhysics> flowers;
+    private final FrameSprite pig;
+    private final ArrayList<I2DPhysics> physics;
     private final SurfaceHolder holder;
     public int surfaceHeight;
     public int surfaceWidth;
@@ -44,7 +45,8 @@ public class GameView extends SurfaceView implements Runnable {
         holder = getHolder();
         paint = new Paint();
         flower = new RotateSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.flower), 220, 220, 90);
-        flowers = new ArrayList<>();
+        pig = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.piggledy_colour), 150, 150, 5);
+        physics = new ArrayList<>();
 
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -101,13 +103,14 @@ public class GameView extends SurfaceView implements Runnable {
             paint.setAntiAlias(true);
 
             // Display the current fps on the screen
-            canvas.drawText("FPS:" + Math.round(framesPerSecond) + " " + flowers.size(), 20, 40, paint);
+            canvas.drawText("FPS:" + Math.round(framesPerSecond) + " " + physics.size(), 20, 40, paint);
 
-            synchronized (flowers) {
-                for (I2DPhysics ff : flowers) {
+            synchronized (physics) {
+                for (I2DPhysics phys : physics) {
                     //paint.setAlpha(somefunction);
-                    PointF p = ff.getPoint();
-                    flower.draw(canvas, p.x, p.y, paint, ff.getFrame());
+                    PointF p = phys.getPoint();
+                    pig.draw(canvas, p.x, p.y, paint, phys.getFrame());
+                    //flower.draw(canvas, p.x, p.y, paint, phys.getFrame());
                 }
             }
 
@@ -122,8 +125,8 @@ public class GameView extends SurfaceView implements Runnable {
      */
     private void update() {
         long time = System.currentTimeMillis();
-        synchronized (flowers) {
-            for (Iterator<I2DPhysics> iterator = flowers.iterator(); iterator.hasNext(); ) {
+        synchronized (physics) {
+            for (Iterator<I2DPhysics> iterator = physics.iterator(); iterator.hasNext(); ) {
                 I2DPhysics fcf = iterator.next();
                 fcf.update(time);
                 if (fcf.getPoint().y > surfaceHeight + flower.getHeight(fcf.getFrame())) {
@@ -165,9 +168,9 @@ public class GameView extends SurfaceView implements Runnable {
                 case MotionEvent.ACTION_MOVE:
                     float x = event.getX(i);
                     float y = event.getY(i);
-                    synchronized (flowers) {
-                        I2DPhysics fcf = new Falling(x, y);
-                        flowers.add(fcf);
+                    synchronized (physics) {
+                        I2DPhysics fcf = new Running(x, y);
+                        physics.add(fcf);
                         if(event.getHistorySize() > 1) {
                             float x1 = event.getHistoricalX(i, 0);
                             float y1 = event.getHistoricalY(i, 0);
@@ -181,23 +184,5 @@ public class GameView extends SurfaceView implements Runnable {
         }
         return true;
 
-    }
-
-
-    private void printSamples(MotionEvent ev) {
-        final int historySize = ev.getHistorySize();
-        final int pointerCount = ev.getPointerCount();
-        for (int h = 0; h < historySize; h++) {
-            Log.w("TEST", String.format("At historical time %d:", ev.getHistoricalEventTime(h)));
-            for (int p = 0; p < pointerCount; p++) {
-                Log.e("TEST", String.format("  pointer %d: (%f,%f)",
-                        ev.getPointerId(p), ev.getHistoricalX(p, h), ev.getHistoricalY(p, h)));
-            }
-        }
-        Log.w("TEST", String.format("At time %d:", ev.getEventTime()));
-        for (int p = 0; p < pointerCount; p++) {
-            Log.e("TEST", String.format("  pointer %d: (%f,%f)",
-                    ev.getPointerId(p), ev.getX(p), ev.getY(p)));
-        }
     }
 }
