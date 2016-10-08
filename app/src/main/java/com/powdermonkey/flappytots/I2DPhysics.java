@@ -30,4 +30,5 @@ public interface I2DPhysics {
      */
     int getFrame();
 
+    void setPoint(float x, float y);
 }

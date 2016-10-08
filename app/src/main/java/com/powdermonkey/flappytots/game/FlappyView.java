@@ -1,33 +1,35 @@
 package com.powdermonkey.flappytots.game;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.powdermonkey.flappytots.I2DPhysics;
+import com.powdermonkey.flappytots.R;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import com.powdermonkey.flappytots.R;
 
 /**
  * Game view
  * Created by Peter Davis on 05/10/2016.
  */
 
-public class GameView extends SurfaceView implements Runnable {
+public class FlappyView extends SurfaceView implements Runnable {
     private final Paint paint;
-    private final RotateSprite flower;
     private final FrameSprite pig;
-    private final ArrayList<I2DPhysics> physics;
+    private final Bitmap flower;
+    private FlappyPhysics physics;
     private final SurfaceHolder holder;
     public int surfaceHeight;
     public int surfaceWidth;
@@ -37,16 +39,16 @@ public class GameView extends SurfaceView implements Runnable {
     private float framesPerSecond;
     private Thread gameThread;
     private FPS fps;
+    private long time;
 
 
-    public GameView(Context context) {
+    public FlappyView(Context context) {
         super(context);
         // Initialize ourHolder and paint objects
         holder = getHolder();
         paint = new Paint();
-        flower = new RotateSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.flower), 220, 220, 90);
-        pig = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.piggledy_colour), 150, 150, 5);
-        physics = new ArrayList<>();
+        pig = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.piggledy_colour), 150, 120, 5);
+        flower = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
 
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -58,6 +60,7 @@ public class GameView extends SurfaceView implements Runnable {
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 surfaceWidth = width;
                 surfaceHeight = height;
+                physics = new FlappyPhysics(width / 4, height / 2);
             }
 
             @Override
@@ -101,18 +104,25 @@ public class GameView extends SurfaceView implements Runnable {
             paint.setTextSize(45);
             paint.setDither(true);
             paint.setAntiAlias(true);
+            paint.setColor(Color.argb(255,156,112,233));
+
+            //canvas.rotate(frame, surfaceWidth / 2, surfaceHeight / 2);
+            Matrix matrix = new Matrix();
+            matrix.postTranslate(-flower.getWidth()/2, -flower.getHeight() / 2);
+            matrix.postRotate(frame);
+            float xx = (float) Math.sin(frame / 100.0);
+            float yy = (float) Math.cos(frame / 120.0);
+            matrix.postScale(xx, 1);
+            matrix.postTranslate(300, 300);
+            canvas.drawBitmap(flower, matrix, paint);
+
+            canvas.drawOval(new RectF(400 - xx * 100, 500 - yy * 100, 400 + xx * 100, 500 + yy * 100), paint);
 
             // Display the current fps on the screen
-            canvas.drawText("FPS:" + Math.round(framesPerSecond) + " " + physics.size(), 20, 40, paint);
+            canvas.drawText("FPS:" + Math.round(framesPerSecond), 20, 40, paint);
 
-            synchronized (physics) {
-                for (I2DPhysics phys : physics) {
-                    //paint.setAlpha(somefunction);
-                    PointF p = phys.getPoint();
-                    pig.draw(canvas, p.x, p.y, paint, phys.getFrame());
-                    //flower.draw(canvas, p.x, p.y, paint, phys.getFrame());
-                }
-            }
+            PointF p = physics.getPoint();
+            pig.draw(canvas, p.x, p.y, paint, physics.getFrame());
 
             // Draw everything to the screen
             holder.unlockCanvasAndPost(canvas);
@@ -124,30 +134,17 @@ public class GameView extends SurfaceView implements Runnable {
      * Runs the game logic updating position and state of all players
      */
     private void update() {
-        long time = System.currentTimeMillis();
-        synchronized (physics) {
-            for (Iterator<I2DPhysics> iterator = physics.iterator(); iterator.hasNext(); ) {
-                I2DPhysics fcf = iterator.next();
-                if(fcf.getPoint().x > surfaceWidth) {
-                    PointF v = fcf.getVector();
-                    fcf.setVector(-v.x, v.y);
-                    v = fcf.getPoint();
-                    fcf.setPoint(surfaceWidth, v.y);
-                }
-                if(fcf.getPoint().x < 0) {
-                    PointF v = fcf.getVector();
-                    fcf.setVector(-v.x, v.y);
-                    v = fcf.getPoint();
-                    fcf.setPoint(0, v.y);
-                }
-                fcf.update(time);
-                if (fcf.getPoint().y > surfaceHeight + flower.getHeight(fcf.getFrame())) {
-                    iterator.remove();
-                }
+        if(physics != null) {
+            time = System.currentTimeMillis();
+            physics.update(time);
+            if (physics.getPoint().y > surfaceHeight) {
+                physics.hitBottom(surfaceHeight);
             }
+            if (physics.getPoint().y < 0) {
+                physics.hitTop(0);
+            }
+            frame++;
         }
-
-        frame++;
     }
 
     // If Game Activity is paused/stopped
@@ -173,28 +170,18 @@ public class GameView extends SurfaceView implements Runnable {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        for (int i = 0; i < event.getPointerCount(); i++) {
-            switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_POINTER_DOWN:
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_MOVE:
-                    float x = event.getX(i);
-                    float y = event.getY(i);
-                    synchronized (physics) {
-                        I2DPhysics fcf = new Running(x, y);
-                        physics.add(fcf);
-                        if(event.getHistorySize() > 1) {
-                            float x1 = event.getHistoricalX(i, 0);
-                            float y1 = event.getHistoricalY(i, 0);
-                            x = x - x1;
-                            y = y - y1;
-                            fcf.setVector(x, y);
-                        }
-                    }
-            }
-
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                float x = event.getX();
+                float y = event.getY();
+                physics.impulse(time);
+                physics.glide(true);
+                break;
+            case MotionEvent.ACTION_UP:
+                physics.glide(false);
+                break;
         }
-        return true;
 
+        return true;
     }
 }

@@ -23,8 +23,8 @@ public class Running implements I2DPhysics {
     @Override
     public void update(long ts) {
         //pseudo acceleration due to gravity
-        v.y = v.y + ((ts - this.ts) / 200.0f);
-        p.x += ((ts - this.ts) / 3.0f); // constant right (running)
+        v.y = v.y + ((ts - this.ts) / 200.0f); 
+        p.x += ((ts - this.ts) / 3.0f); // constant right (running) 1px every 3ms
         v.x *= 0.99; // Chucked x velocity attenuation
         //try to keep the frame rotation constant regardless of drawing time
         frame += ((ts - this.ts) / 150.0f); // One frame every 150ms
@@ -52,5 +52,11 @@ public class Running implements I2DPhysics {
     @Override
     public int getFrame() {
         return Math.round(frame);
+    }
+
+    @Override
+    public void setPoint(float x, float y) {
+        p.x = x;
+        p.y = y;
     }
 }

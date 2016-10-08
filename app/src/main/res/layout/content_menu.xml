@@ -14,12 +14,21 @@
     tools:showIn="@layout/activity_menu">
 
     <Button
-        android:text="@string/run"
+        android:text="@string/flappy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_marginStart="109dp"
         android:layout_marginTop="64dp"
-        android:id="@+id/run_button" />
+        android:id="@+id/flappy_button" />
+
+    <Button
+        android:text="@string/run"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:id="@+id/run_button"
+        android:layout_below="@+id/flappy_button"
+        android:layout_alignStart="@+id/flappy_button" />
 </RelativeLayout>
