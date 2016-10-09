@@ -1,5 +1,7 @@
 package com.powdermonkey.flappytots;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PointF;
 
 /**
@@ -31,4 +33,10 @@ public interface I2DPhysics {
     int getFrame();
 
     void setPoint(float x, float y);
+
+    ISprite getSprite();
+
+    void setSprite(ISprite sprite);
+
+    void draw(Canvas canvas, Paint paint);
 }

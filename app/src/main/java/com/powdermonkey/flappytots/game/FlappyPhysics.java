@@ -1,20 +1,22 @@
 package com.powdermonkey.flappytots.game;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PointF;
 
+import com.powdermonkey.flappytots.AbstractPhysics;
 import com.powdermonkey.flappytots.I2DPhysics;
+import com.powdermonkey.flappytots.ISprite;
 
 /**
  * Created by Peter Davis on 05/10/2016.
  */
 
-public class FlappyPhysics implements I2DPhysics {
+public class FlappyPhysics extends AbstractPhysics {
     private final float jump;
     private final float acceleration;
     private final float gacceleration;
     private long ts;
-    private PointF p;
-    private PointF v;
     private float frame = 0;
     private long imptime;
     private boolean glide;
@@ -48,30 +50,14 @@ public class FlappyPhysics implements I2DPhysics {
     }
 
     @Override
-    public PointF getPoint() {
-        return p;
-    }
-
-    @Override
-    public PointF getVector() {
-        return v;
-    }
-
-    @Override
-    public void setVector(float x, float y) {
-        v.x = x;
-        v.y = y;
-    }
-
-    @Override
     public int getFrame() {
         return (int) frame;
     }
 
     @Override
-    public void setPoint(float x, float y) {
-        p.x = x;
-        p.y = y;
+    public void draw(Canvas canvas, Paint paint) {
+        sprite.draw(canvas, p.x, p.y, paint, (int) frame);
+
     }
 
     public void impulse(long ts) {

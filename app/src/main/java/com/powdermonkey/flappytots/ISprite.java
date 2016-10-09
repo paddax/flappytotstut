@@ -16,6 +16,8 @@ public interface ISprite {
 
     void draw(Canvas canvas, float x, float y, Paint paint, int frame);
 
+    int getHeight(int frame);
+    int getWidth(int frame);
     int getFrameCount();
 
 }

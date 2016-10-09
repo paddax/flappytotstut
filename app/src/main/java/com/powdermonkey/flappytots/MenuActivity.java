@@ -36,7 +36,6 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
                 intent.setClassName(MenuActivity.this, GameActivity.class.getName());
                 startActivity(intent);
             }
@@ -46,8 +45,6 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.putExtra(FlappyActivity.IMAGE_ID, R.drawable.flower1);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
                 intent.setClassName(MenuActivity.this, FlappyActivity.class.getName());
                 startActivity(intent);
             }

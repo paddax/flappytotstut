@@ -27,8 +27,10 @@ import java.util.Iterator;
 
 public class FlappyView extends SurfaceView implements Runnable {
     private final Paint paint;
-    private final FrameSprite pig;
-    private final Bitmap flower;
+    private FrameSprite pig;
+    private RotateSprite flower;
+    private final Bitmap obstical1;
+    private final Bitmap pigbm;
     private FlappyPhysics physics;
     private final SurfaceHolder holder;
     private int surfaceHeight;
@@ -49,8 +51,8 @@ public class FlappyView extends SurfaceView implements Runnable {
         // Initialize ourHolder and paint objects
         holder = getHolder();
         paint = new Paint();
-        pig = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), res), 150, 120, 5);
-        flower = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+        pigbm = BitmapFactory.decodeResource(this.getResources(), res);
+        obstical1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
 
         objects = new ArrayList<>();
 
@@ -64,8 +66,11 @@ public class FlappyView extends SurfaceView implements Runnable {
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 surfaceWidth = width;
                 surfaceHeight = height;
+                flower = new RotateSprite(obstical1, surfaceHeight / 4, surfaceHeight / 4, 30);
+                pig = new FrameSprite(pigbm, surfaceHeight / 4, surfaceHeight / 5, 5);
                 physics = new FlappyPhysics(width, height);
                 physics.setPoint(width / 4, height / 2);
+                physics.setSprite(pig);
             }
 
             @Override
@@ -85,8 +90,8 @@ public class FlappyView extends SurfaceView implements Runnable {
             update();
 
             // Draw the frame
-            draw();
-
+            if(pig != null)
+                draw();
 
             if(++count%10 == 0) {
                 framesPerSecond = fps.fps() * 10;
@@ -111,28 +116,15 @@ public class FlappyView extends SurfaceView implements Runnable {
             paint.setAntiAlias(true);
             paint.setColor(Color.argb(255, 156, 112, 233));
 
-            //canvas.rotate(frame, surfaceWidth / 2, surfaceHeight / 2);
-            Matrix matrix = new Matrix();
-            matrix.postTranslate(-flower.getWidth() / 2, -flower.getHeight() / 2);
-            matrix.postRotate(frame);
-            float xx = (float) Math.sin(frame / 100.0);
-            float yy = (float) Math.cos(frame / 120.0);
-            matrix.postScale(xx, 1);
-            matrix.postTranslate(300, 300);
-            canvas.drawBitmap(flower, matrix, paint);
-
-            canvas.drawOval(new RectF(400 - xx * 100, 500 - yy * 100, 400 + xx * 100, 500 + yy * 100), paint);
-
             // Display the current fps on the screen
             canvas.drawText("FPS:" + Math.round(framesPerSecond), 20, 40, paint);
 
-            PointF p = physics.getPoint();
-            pig.draw(canvas, p.x, p.y, paint, physics.getFrame());
+            physics.draw(canvas, paint);
 
             //draw the background objects
 
             for(MovingLeft o: objects) {
-                canvas.drawBitmap(flower, o.getPoint().x, o.getPoint().y, paint);
+                o.draw(canvas, paint);
             }
 
             // Draw everything to the screen
@@ -148,22 +140,23 @@ public class FlappyView extends SurfaceView implements Runnable {
         if(physics != null) {
             time = System.currentTimeMillis();
             physics.update(time);
-            if (physics.getPoint().y > surfaceHeight) {
-                physics.hitBottom(surfaceHeight);
+            if (physics.getPoint().y > surfaceHeight - physics.getSprite().getHeight(physics.getFrame()) / 2) {
+                physics.hitBottom(surfaceHeight - physics.getSprite().getHeight(physics.getFrame()) / 2);
             }
-            if (physics.getPoint().y < 0) {
-                physics.hitTop(0);
+            if (physics.getPoint().y < physics.getSprite().getHeight(physics.getFrame()) / 2) {
+                physics.hitTop(physics.getSprite().getHeight(physics.getFrame()) / 2);
             }
 
             if(frame % 100 == 0) {
                 MovingLeft o = new MovingLeft(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
+                o.setSprite(flower);
                 objects.add(o);
             }
 
             for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
                 MovingLeft o = i.next();
                 o.update(time);
-                if(o.getPoint().x < 0 - flower.getWidth()) {
+                if(o.getPoint().x < -o.getSprite().getWidth(o.getFrame())) {
                     i.remove();
                 }
             }

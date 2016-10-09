@@ -1,17 +1,19 @@
 package com.powdermonkey.flappytots.game;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PointF;
 
-import com.powdermonkey.flappytots.I2DPhysics;
+import com.powdermonkey.flappytots.AbstractPhysics;
+import com.powdermonkey.flappytots.ISprite;
 
 /**
  * Created by Peter Davis on 09/10/2016.
  */
-public class MovingLeft implements I2DPhysics {
+public class MovingLeft extends AbstractPhysics {
 
     private long ts;
-    PointF p;
-    PointF v;
+    private float frame;
 
     /**
      * Constructs an object that moves left across the screen
@@ -32,22 +34,7 @@ public class MovingLeft implements I2DPhysics {
         p.x += (v.x * t);
         p.y += (v.y * t);
         this.ts = ts;
-    }
-
-    @Override
-    public PointF getPoint() {
-        return p;
-    }
-
-    @Override
-    public PointF getVector() {
-        return v;
-    }
-
-    @Override
-    public void setVector(float x, float y) {
-        v.set(x, y);
-
+        frame += ((ts - this.ts) / 100.0f);
     }
 
     @Override
@@ -56,7 +43,7 @@ public class MovingLeft implements I2DPhysics {
     }
 
     @Override
-    public void setPoint(float x, float y) {
-        p.set(x, y);
+    public void draw(Canvas canvas, Paint paint) {
+        sprite.draw(canvas, p.x, p.y, paint, (int) frame);
     }
 }
