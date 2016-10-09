@@ -44,12 +44,12 @@ public class FlappyView extends SurfaceView implements Runnable {
     private ArrayList<MovingLeft> objects;
 
 
-    public FlappyView(Context context) {
+    public FlappyView(Context context, int res) {
         super(context);
         // Initialize ourHolder and paint objects
         holder = getHolder();
         paint = new Paint();
-        pig = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.piggledy_colour), 150, 120, 5);
+        pig = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), res), 150, 120, 5);
         flower = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
 
         objects = new ArrayList<>();

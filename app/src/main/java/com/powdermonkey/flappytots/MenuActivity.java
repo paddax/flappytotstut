@@ -41,11 +41,12 @@ public class MenuActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        b = (Button) findViewById(R.id.flappy_button);
+        final Button button = (Button) findViewById(R.id.flappy_button);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.putExtra(FlappyActivity.IMAGE_ID, R.drawable.flower1);
                 //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
                 intent.setClassName(MenuActivity.this, FlappyActivity.class.getName());
                 startActivity(intent);
