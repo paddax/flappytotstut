@@ -31,15 +31,17 @@ public class FlappyView extends SurfaceView implements Runnable {
     private final Bitmap flower;
     private FlappyPhysics physics;
     private final SurfaceHolder holder;
-    public int surfaceHeight;
-    public int surfaceWidth;
-
+    private int surfaceHeight;
+    private int surfaceWidth;
 
     private boolean playing;
     private float framesPerSecond;
     private Thread gameThread;
     private FPS fps;
     private long time;
+
+
+    private ArrayList<MovingLeft> objects;
 
 
     public FlappyView(Context context) {
@@ -49,6 +51,8 @@ public class FlappyView extends SurfaceView implements Runnable {
         paint = new Paint();
         pig = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.piggledy_colour), 150, 120, 5);
         flower = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+
+        objects = new ArrayList<>();
 
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -60,7 +64,8 @@ public class FlappyView extends SurfaceView implements Runnable {
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 surfaceWidth = width;
                 surfaceHeight = height;
-                physics = new FlappyPhysics(width / 4, height / 2);
+                physics = new FlappyPhysics(width, height);
+                physics.setPoint(width / 4, height / 2);
             }
 
             @Override
@@ -104,11 +109,11 @@ public class FlappyView extends SurfaceView implements Runnable {
             paint.setTextSize(45);
             paint.setDither(true);
             paint.setAntiAlias(true);
-            paint.setColor(Color.argb(255,156,112,233));
+            paint.setColor(Color.argb(255, 156, 112, 233));
 
             //canvas.rotate(frame, surfaceWidth / 2, surfaceHeight / 2);
             Matrix matrix = new Matrix();
-            matrix.postTranslate(-flower.getWidth()/2, -flower.getHeight() / 2);
+            matrix.postTranslate(-flower.getWidth() / 2, -flower.getHeight() / 2);
             matrix.postRotate(frame);
             float xx = (float) Math.sin(frame / 100.0);
             float yy = (float) Math.cos(frame / 120.0);
@@ -123,6 +128,12 @@ public class FlappyView extends SurfaceView implements Runnable {
 
             PointF p = physics.getPoint();
             pig.draw(canvas, p.x, p.y, paint, physics.getFrame());
+
+            //draw the background objects
+
+            for(MovingLeft o: objects) {
+                canvas.drawBitmap(flower, o.getPoint().x, o.getPoint().y, paint);
+            }
 
             // Draw everything to the screen
             holder.unlockCanvasAndPost(canvas);
@@ -143,12 +154,27 @@ public class FlappyView extends SurfaceView implements Runnable {
             if (physics.getPoint().y < 0) {
                 physics.hitTop(0);
             }
+
+            if(frame % 100 == 0) {
+                MovingLeft o = new MovingLeft(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
+                objects.add(o);
+            }
+
+            for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
+                MovingLeft o = i.next();
+                o.update(time);
+                if(o.getPoint().x < 0 - flower.getWidth()) {
+                    i.remove();
+                }
+            }
+
             frame++;
         }
     }
 
-    // If Game Activity is paused/stopped
-    // shutdown our thread.
+    /**
+     * shutdown game thread.
+     */
     public void pause() {
         playing = false;
         try {
@@ -156,12 +182,12 @@ public class FlappyView extends SurfaceView implements Runnable {
         } catch (InterruptedException e) {
             Log.e("Error:", "joining thread");
         }
-
     }
 
 
-    // If Game Activity is started
-    // start our thread.
+    /**
+     * start the game thread.
+     */
     public void resume() {
         playing = true;
         gameThread = new Thread(this);

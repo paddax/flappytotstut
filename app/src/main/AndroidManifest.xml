@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".GameActivity" />
-        <activity android:name=".FlappyActivity"></activity>
+        <activity android:name=".FlappyActivity" android:screenOrientation="landscape"/>
     </application>
 
 </manifest>

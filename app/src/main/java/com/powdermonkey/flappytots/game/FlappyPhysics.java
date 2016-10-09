@@ -9,6 +9,9 @@ import com.powdermonkey.flappytots.I2DPhysics;
  */
 
 public class FlappyPhysics implements I2DPhysics {
+    private final float jump;
+    private final float acceleration;
+    private final float gacceleration;
     private long ts;
     private PointF p;
     private PointF v;
@@ -16,25 +19,32 @@ public class FlappyPhysics implements I2DPhysics {
     private long imptime;
     private boolean glide;
 
-    public FlappyPhysics(float x, float y) {
-        p = new PointF(x, y);
+    public FlappyPhysics(float width, float height) {
+        p = new PointF(0, 0);
         v = new PointF(0,0);
+
+        jump = height / 1.5f; // pixels/sec2
+        acceleration = height; // pixels/sec2
+        gacceleration = acceleration / 4;
         ts = System.currentTimeMillis();
     }
 
     @Override
     public void update(long ts) {
         //pseudo acceleration due to gravity
-        v.y = v.y + ((ts - this.ts) / (glide && (v.y > 0) ? 100.0f : 25.0f));
-        //try to keep the rotation constant regardless of drawing time
-        if (ts - imptime > 300) {
-            frame = 0;
-        } else {
-            frame += ((ts - this.ts) / 100.0f);
-        }
-        this.ts = ts;
-        p.y += v.y;
+        float t = (ts - this.ts) / 1000.0f; // time in seconds
+        v.y = v.y + (glide&v.y>0?gacceleration:acceleration) * t; // constant acceleration based on time
+        p.y += (v.y * t);
         //p.x += v.x;
+
+
+        if (ts - imptime > 500) {
+            frame = 0; // falling frames
+        } else {
+            frame += ((ts - this.ts) / 100.0f); // flap sequence
+        }
+
+        this.ts = ts;
     }
 
     @Override
@@ -66,7 +76,7 @@ public class FlappyPhysics implements I2DPhysics {
 
     public void impulse(long ts) {
         imptime = ts;
-        v.y = -15;
+        v.y = -jump;
     }
 
     public void hitTop(float top) {
