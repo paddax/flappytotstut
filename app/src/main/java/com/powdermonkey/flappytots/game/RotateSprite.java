@@ -37,7 +37,7 @@ public class RotateSprite implements ISprite {
         images = new Bitmap[frames];
         Matrix matrix = new Matrix();
         collision = new ArrayList<>();
-        collision.add(new Circle2dF(0,0,width/2));
+        collision.add(new Circle2dF(0,0,width*6/13));
 
         for(int i=0; i<frames; i++) {
             images[i] = Bitmap.createScaledBitmap(src, width, height, false);

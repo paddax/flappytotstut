@@ -12,12 +12,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.powdermonkey.flappytots.R;
-import com.powdermonkey.flappytots.geometry.IRegion;
 import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Game view
@@ -29,7 +27,7 @@ public class FlappyView extends SurfaceView implements Runnable {
     private final RegionSet pighit;
     private FrameSprite pig;
     private RotateSprite flower;
-    private final Bitmap obstical1;
+    private final Bitmap obsticle1;
     private final Bitmap pigbm;
     private FlappyPhysics physics;
     private final SurfaceHolder holder;
@@ -54,7 +52,7 @@ public class FlappyView extends SurfaceView implements Runnable {
         holder = getHolder();
         paint = new Paint();
         pigbm = BitmapFactory.decodeResource(this.getResources(), res);
-        obstical1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+        obsticle1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
 
         pighit = new RegionSet(context, R.raw.piggledy_hit);
 
@@ -70,7 +68,7 @@ public class FlappyView extends SurfaceView implements Runnable {
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 surfaceWidth = width;
                 surfaceHeight = height;
-                flower = new RotateSprite(obstical1, surfaceHeight / 4, surfaceHeight / 4, 30);
+                flower = new RotateSprite(obsticle1, surfaceHeight / 4, surfaceHeight / 4, 30);
                 pig = new FrameSprite(pigbm, surfaceHeight / 4, surfaceHeight / 5, 5);
                 pig.setRegions(pighit);
                 physics = new FlappyPhysics(width, height);
@@ -121,23 +119,22 @@ public class FlappyView extends SurfaceView implements Runnable {
             paint.setAntiAlias(true);
             paint.setColor(Color.argb(255, 156, 112, 233));
 
+            paint.setAlpha(255);
+            paint.setStyle(Paint.Style.STROKE);
+
+
             // Display the current fps on the screen
             canvas.drawText("FPS:" + Math.round(framesPerSecond), 20, 40, paint);
 
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setAlpha(hit?45:255);
-             physics.getSprite().getRegions(physics.getFrame()).get(0).draw(canvas, paint);
-            physics.draw(canvas, paint);
 
             //draw the background objects
-            paint.setAlpha(255);
-
             for(MovingLeft o: objects) {
-                o.getSprite().updateRegions(o.getPoint(), o.getFrame());
-                List<? extends IRegion> rr = o.getSprite().getRegions(0);
-                rr.get(0).draw(canvas, paint);
                 o.draw(canvas, paint);
             }
+
+            // Draw the pig
+            paint.setAlpha(hit?45:255); // Set the alpha from the hit state
+            physics.draw(canvas, paint);
 
             // Draw everything to the screen
             holder.unlockCanvasAndPost(canvas);
@@ -151,21 +148,27 @@ public class FlappyView extends SurfaceView implements Runnable {
     private void update() {
         if(physics != null) {
             time = System.currentTimeMillis();
-            physics.update(time);
+            physics.update(time); // update the physics
+
+            // Bounds check the pig and tell the physics if we are outside of bounds
             if (physics.getPoint().y > surfaceHeight - physics.getSprite().getHeight(physics.getFrame()) / 2) {
                 physics.hitBottom(surfaceHeight - physics.getSprite().getHeight(physics.getFrame()) / 2);
             }
-            if (physics.getPoint().y < physics.getSprite().getHeight(physics.getFrame()) / 2) {
+            else if (physics.getPoint().y < physics.getSprite().getHeight(physics.getFrame()) / 2) {
                 physics.hitTop(physics.getSprite().getHeight(physics.getFrame()) / 2);
             }
 
+            // nextFrame contains the next frame for creating an obstacle
             if(frame > nextFrame) {
+                // Randomly determine when next flower occurs (this should not be frame based but time based)
                 nextFrame =  frame + 40 + Math.round(Math.random() * 60);
+                // construct a new obstacle somewhere off the right of the screen
                 MovingLeft o = new MovingLeft(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
                 o.setSprite(flower);
                 objects.add(o);
             }
 
+            // update the list of obstacles
             for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
                 MovingLeft o = i.next();
                 o.update(time);
@@ -174,10 +177,11 @@ public class FlappyView extends SurfaceView implements Runnable {
                 }
             }
 
-            physics.getSprite().updateRegions(physics.getPoint(), physics.getFrame());
+            // Check for collision between pig and any flower
+            physics.updateRegions();
             hit = false;
             for(MovingLeft ml: objects) {
-                ml.getSprite().updateRegions(ml.getPoint(), ml.getFrame());
+                ml.updateRegions();
                 if(physics.getSprite().collide(ml.getSprite().getRegions(physics.getFrame())))
                     hit = true;
             }

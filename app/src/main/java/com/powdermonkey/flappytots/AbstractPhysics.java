@@ -13,6 +13,7 @@ public abstract class AbstractPhysics implements I2DPhysics {
     protected PointF p;
     protected PointF v;
     protected ISprite sprite;
+    protected boolean drawCollisionRegions = true;
 
     @Override
     public PointF getPoint() {
@@ -36,7 +37,6 @@ public abstract class AbstractPhysics implements I2DPhysics {
         p.y = y;
     }
 
-
     @Override
     public ISprite getSprite() {
         return sprite;
@@ -45,5 +45,10 @@ public abstract class AbstractPhysics implements I2DPhysics {
     @Override
     public void setSprite(ISprite sprite) {
         this.sprite = sprite;
+    }
+
+    @Override
+    public void updateRegions() {
+        sprite.updateRegions(getPoint(), getFrame());
     }
 }

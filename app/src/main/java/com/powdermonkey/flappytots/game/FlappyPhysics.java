@@ -5,8 +5,9 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 import com.powdermonkey.flappytots.AbstractPhysics;
-import com.powdermonkey.flappytots.I2DPhysics;
-import com.powdermonkey.flappytots.ISprite;
+import com.powdermonkey.flappytots.geometry.IRegion;
+
+import java.util.List;
 
 /**
  * Created by Peter Davis on 05/10/2016.
@@ -58,6 +59,12 @@ public class FlappyPhysics extends AbstractPhysics {
     public void draw(Canvas canvas, Paint paint) {
         sprite.draw(canvas, p.x, p.y, paint, (int) frame);
 
+        if(drawCollisionRegions) {
+            List<? extends IRegion> rr = sprite.getRegions(getFrame());
+            for(IRegion r: rr) {
+                r.draw(canvas, paint);
+            }
+        }
     }
 
     public void impulse(long ts) {
