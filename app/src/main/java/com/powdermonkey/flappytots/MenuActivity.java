@@ -41,7 +41,7 @@ public class MenuActivity extends AppCompatActivity {
             }
         });
         final Button button = (Button) findViewById(R.id.flappy_button);
-        b.setOnClickListener(new View.OnClickListener() {
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);

@@ -5,20 +5,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PointF;
-import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.powdermonkey.flappytots.I2DPhysics;
 import com.powdermonkey.flappytots.R;
+import com.powdermonkey.flappytots.geometry.IRegion;
+import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Game view
@@ -27,6 +26,7 @@ import java.util.Iterator;
 
 public class FlappyView extends SurfaceView implements Runnable {
     private final Paint paint;
+    private final RegionSet pighit;
     private FrameSprite pig;
     private RotateSprite flower;
     private final Bitmap obstical1;
@@ -44,6 +44,8 @@ public class FlappyView extends SurfaceView implements Runnable {
 
 
     private ArrayList<MovingLeft> objects;
+    private boolean hit;
+    private long nextFrame;
 
 
     public FlappyView(Context context, int res) {
@@ -53,6 +55,8 @@ public class FlappyView extends SurfaceView implements Runnable {
         paint = new Paint();
         pigbm = BitmapFactory.decodeResource(this.getResources(), res);
         obstical1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+
+        pighit = new RegionSet(context, R.raw.piggledy_hit);
 
         objects = new ArrayList<>();
 
@@ -68,6 +72,7 @@ public class FlappyView extends SurfaceView implements Runnable {
                 surfaceHeight = height;
                 flower = new RotateSprite(obstical1, surfaceHeight / 4, surfaceHeight / 4, 30);
                 pig = new FrameSprite(pigbm, surfaceHeight / 4, surfaceHeight / 5, 5);
+                pig.setRegions(pighit);
                 physics = new FlappyPhysics(width, height);
                 physics.setPoint(width / 4, height / 2);
                 physics.setSprite(pig);
@@ -119,11 +124,18 @@ public class FlappyView extends SurfaceView implements Runnable {
             // Display the current fps on the screen
             canvas.drawText("FPS:" + Math.round(framesPerSecond), 20, 40, paint);
 
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setAlpha(hit?45:255);
+             physics.getSprite().getRegions(physics.getFrame()).get(0).draw(canvas, paint);
             physics.draw(canvas, paint);
 
             //draw the background objects
+            paint.setAlpha(255);
 
             for(MovingLeft o: objects) {
+                o.getSprite().updateRegions(o.getPoint(), o.getFrame());
+                List<? extends IRegion> rr = o.getSprite().getRegions(0);
+                rr.get(0).draw(canvas, paint);
                 o.draw(canvas, paint);
             }
 
@@ -147,7 +159,8 @@ public class FlappyView extends SurfaceView implements Runnable {
                 physics.hitTop(physics.getSprite().getHeight(physics.getFrame()) / 2);
             }
 
-            if(frame % 100 == 0) {
+            if(frame > nextFrame) {
+                nextFrame =  frame + 40 + Math.round(Math.random() * 60);
                 MovingLeft o = new MovingLeft(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
                 o.setSprite(flower);
                 objects.add(o);
@@ -159,6 +172,14 @@ public class FlappyView extends SurfaceView implements Runnable {
                 if(o.getPoint().x < -o.getSprite().getWidth(o.getFrame())) {
                     i.remove();
                 }
+            }
+
+            physics.getSprite().updateRegions(physics.getPoint(), physics.getFrame());
+            hit = false;
+            for(MovingLeft ml: objects) {
+                ml.getSprite().updateRegions(ml.getPoint(), ml.getFrame());
+                if(physics.getSprite().collide(ml.getSprite().getRegions(physics.getFrame())))
+                    hit = true;
             }
 
             frame++;

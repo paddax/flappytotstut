@@ -1,5 +1,8 @@
 package com.powdermonkey.flappytots.geometry;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.RectF;
 
 /**
@@ -8,7 +11,19 @@ import android.graphics.RectF;
 
 public interface IRegion {
 
-    boolean intersect(Circle2dF c);
+    int CIRCLE = 1;
+    int RECT = 2;
 
-    boolean intersect(RectF r);
+    boolean intersect(IRegion r);
+
+    void move(float x, float y);
+    void move(PointF p);
+
+    void draw(Canvas canvas, Paint paint);
+
+    void scale(float x, float y);
+
+    int getType();
+
+    void offset(float x, float y);
 }

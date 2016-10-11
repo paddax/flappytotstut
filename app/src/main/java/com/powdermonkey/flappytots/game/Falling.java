@@ -32,6 +32,7 @@ public class Falling extends AbstractPhysics {
         this.ts = ts;
         p.y += v.y;
         p.x += v.x;
+        sprite.updateRegions(p, 0);
     }
 
     @Override
