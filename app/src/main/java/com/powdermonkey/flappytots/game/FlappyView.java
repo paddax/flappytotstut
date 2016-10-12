@@ -182,7 +182,7 @@ public class FlappyView extends SurfaceView implements Runnable {
             hit = false;
             for(MovingLeft ml: objects) {
                 ml.updateRegions();
-                if(physics.getSprite().collide(ml.getSprite().getRegions(physics.getFrame())))
+                if(physics.getSprite().collide(ml.getSprite().getRegions(ml.getFrame()), physics.getFrame()))
                     hit = true;
             }
 

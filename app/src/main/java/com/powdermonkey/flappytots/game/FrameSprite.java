@@ -56,19 +56,13 @@ public class FrameSprite implements ISprite {
     }
 
     @Override
-    public boolean collide(List<? extends IRegion> regions) {
-        if(regions.size() > 0) {
-            if(regions.get(0).intersect(collision.frames.get(0).get(0))) {
-                if(regions.size() == 1)
+    public boolean collide(List<? extends IRegion> regions, int frame) {
+        for (IRegion r : collision.frames.get(frame)) {
+            for (IRegion r1 : regions) {
+                if (r.intersect(r1))
                     return true;
-
-                for(int i=0; i<regions.size(); i++) {
-                    if(regions.get(i).intersect(collision.frames.get(0).get(0)))
-                        return true;
-                }
             }
         }
-
         return false;
     }
 

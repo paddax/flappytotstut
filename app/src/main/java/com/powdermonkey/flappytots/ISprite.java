@@ -29,9 +29,11 @@ public interface ISprite {
      * Determines if the sprite at location intersects with regions presented
      *
      * @param regions Prepared regions of other sprite
+     *                @param frame frame to detect
+     *                             @param frame frame to check
      * @return true if the sprites are colliding
      */
-    boolean collide(List<? extends IRegion> regions);
+    boolean collide(List<? extends IRegion> regions, int frame);
 
     /**
      * Updates the collision regions

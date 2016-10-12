@@ -6,6 +6,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.powdermonkey.flappytots.geometry.Circle2dF;
+import com.powdermonkey.flappytots.geometry.Rect2dF;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,11 +42,11 @@ public class ExampleInstrumentedTest {
     @Test
     public void circleRectIntersect() throws Exception {
         Circle2dF c1 = new Circle2dF(1, 0, 1);
-        RectF r = new RectF(1.5f, -2, 42, 2);
+        Rect2dF r = new Rect2dF(1.5f, -2, 42, 2);
         assertTrue("Circle intersects rectangle: ", c1.intersect(r));
 
         c1 = new Circle2dF(0,0,1);
-        r = new RectF(-10, -10, 10, 10);
+        r = new Rect2dF(-10, -10, 10, 10);
         assertTrue("Circle intersects rectangle: ", c1.intersect(r));
     }
 

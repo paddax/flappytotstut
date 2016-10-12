@@ -46,6 +46,7 @@ public class FlappyPhysics extends AbstractPhysics {
         } else {
             frame += ((ts - this.ts) / 100.0f); // flap sequence
         }
+        frame %= sprite.getFrameCount();
 
         this.ts = ts;
     }

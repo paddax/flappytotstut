@@ -57,7 +57,7 @@ public class RotateSprite implements ISprite {
     }
 
     @Override
-    public boolean collide(List<? extends IRegion> regions) {
+    public boolean collide(List<? extends IRegion> regions, int frame) {
         if(regions.size() > 0) {
             if(regions.get(0).intersect(collision.get(0))) {
                 if(regions.size() == 1)
