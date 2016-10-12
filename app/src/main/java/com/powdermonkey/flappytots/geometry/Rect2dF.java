@@ -25,11 +25,11 @@ public class Rect2dF implements IRegion {
 
 
     @Override
-    public boolean intersect(IRegion c) {
-        if(c.getType() == CIRCLE)
-            return Circle2dF.intersect((Circle2dF) c, this);
+    public boolean intersect(IRegion r) {
+        if(r.getType() == CIRCLE)
+            return Circle2dF.intersect((Circle2dF) r, this);
         else
-            return active.intersect(((Rect2dF)c).active);
+            return active.intersect(((Rect2dF)r).active);
     }
 
     @Override
@@ -64,5 +64,10 @@ public class Rect2dF implements IRegion {
     @Override
     public void offset(float x, float y) {
         defined.offset(x, y);
+    }
+
+    @Override
+    public IRegion copy() {
+        return new Rect2dF(defined);
     }
 }

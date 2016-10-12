@@ -53,7 +53,7 @@ public class MovingLeft extends AbstractPhysics {
         sprite.draw(canvas, p.x, p.y, paint, (int) frame);
 
         if(drawCollisionRegions) {
-            List<? extends IRegion> rr = sprite.getRegions(getFrame());
+            List<? extends IRegion> rr = regions.frames.get(getFrame());
             for(IRegion r: rr) {
                 r.draw(canvas, paint);
             }

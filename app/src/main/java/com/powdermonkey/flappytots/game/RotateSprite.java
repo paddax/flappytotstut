@@ -24,7 +24,7 @@ import java.util.List;
 public class RotateSprite implements ISprite {
 
     private final Bitmap[] images;
-    private final ArrayList<Circle2dF> collision;
+    private RegionSet regions;
 
     /**
      * The src bitmap is rescaled too width and height
@@ -36,8 +36,7 @@ public class RotateSprite implements ISprite {
     public RotateSprite(Bitmap src, int width, int height, int frames) {
         images = new Bitmap[frames];
         Matrix matrix = new Matrix();
-        collision = new ArrayList<>();
-        collision.add(new Circle2dF(0,0,width*6/13));
+        regions = new RegionSet(new Circle2dF(0,0,width*6/13), frames);
 
         for(int i=0; i<frames; i++) {
             images[i] = Bitmap.createScaledBitmap(src, width, height, false);
@@ -47,30 +46,8 @@ public class RotateSprite implements ISprite {
     }
 
     @Override
-    public List<? extends IRegion> getRegions(int frame) {
-        return collision;
-    }
-
-    @Override
-    public void updateRegions(PointF p, int frame) {
-        collision.get(0).move(p);
-    }
-
-    @Override
-    public boolean collide(List<? extends IRegion> regions, int frame) {
-        if(regions.size() > 0) {
-            if(regions.get(0).intersect(collision.get(0))) {
-                if(regions.size() == 1)
-                    return true;
-
-                for(int i=1; i<regions.size(); i++) {
-                    if(regions.get(i).intersect(collision.get(0)))
-                        return true;
-                }
-            }
-        }
-
-        return false;
+    public RegionSet getRegions() {
+        return regions;
     }
 
     @Override

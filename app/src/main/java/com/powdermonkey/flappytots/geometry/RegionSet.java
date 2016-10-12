@@ -14,19 +14,19 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * List of list of regions for collision detection
+ *
  * Created by Peter Davis on 10/10/2016.
  */
-
 public class RegionSet {
 
     public List<List<IRegion>> frames = new ArrayList<>();
 
-    public RegionSet(int width, int height, int f) {
+    public RegionSet(IRegion r, int f) {
         for(int i=0; i<f; i++) {
-            Rect2dF r = new Rect2dF(-width/2, -height/2, width/2, height/2);
-            ArrayList<IRegion> frame = new ArrayList<>();
-            frame.add(r);
-            frames.add(frame);
+            ArrayList<IRegion> l = new ArrayList<>();
+            l.add(r);
+            frames.add(l);
         }
     }
 
@@ -59,6 +59,16 @@ public class RegionSet {
         }
     }
 
+    public RegionSet(RegionSet copy) {
+        for(List<? extends IRegion> l: copy.frames) {
+            ArrayList<IRegion> c = new ArrayList<>(l.size());
+            for(IRegion r: l) {
+                c.add(r.copy());
+            }
+            frames.add(c);
+        }
+    }
+
     private static IRegion readCircle(Iterator<String> recit) {
         float x1 = Float.parseFloat(recit.next());
         float y1 = Float.parseFloat(recit.next());
@@ -88,6 +98,5 @@ public class RegionSet {
                 r.offset(x, y);
             }
         }
-
     }
 }
