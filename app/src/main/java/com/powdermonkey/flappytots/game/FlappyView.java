@@ -178,13 +178,26 @@ public class FlappyView extends SurfaceView implements Runnable {
             }
 
             // Check for collision between pig and any flower
+/*
             physics.updateRegions();
             hit = false;
             for(MovingLeft ml: objects) {
                 ml.updateRegions();
-                if(physics.getSprite().collide(ml.getSprite().getRegions(ml.getFrame()), physics.getFrame()))
+                if(physics.collide(ml.getRegions())) {
                     hit = true;
+                }
             }
+*/
+            physics.updateRegions();
+            for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
+                MovingLeft ml = i.next();
+                ml.updateRegions();
+                if(physics.collide(ml.getRegions())) {
+                    i.remove();
+                }
+
+            }
+
 
             frame++;
         }

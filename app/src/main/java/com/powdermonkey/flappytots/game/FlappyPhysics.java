@@ -28,7 +28,7 @@ public class FlappyPhysics extends AbstractPhysics {
 
         jump = height / 1.5f; // pixels/sec2
         acceleration = height; // pixels/sec2
-        gacceleration = acceleration / 4;
+        gacceleration = acceleration / 3;
         ts = System.currentTimeMillis();
     }
 
@@ -61,7 +61,7 @@ public class FlappyPhysics extends AbstractPhysics {
         sprite.draw(canvas, p.x, p.y, paint, (int) frame);
 
         if(drawCollisionRegions) {
-            List<? extends IRegion> rr = sprite.getRegions(getFrame());
+            List<? extends IRegion> rr = regions.frames.get(getFrame());
             for(IRegion r: rr) {
                 r.draw(canvas, paint);
             }

@@ -11,9 +11,9 @@ import android.graphics.RectF;
 
 public class Circle2dF implements IRegion {
 
-    public PointF defined;
-    public PointF center;
-    public float radius;
+    private PointF defined;
+    private PointF center;
+    private float radius;
 
     public Circle2dF(float x, float y, float r) {
         this.center = new PointF(x, y);
@@ -67,6 +67,11 @@ public class Circle2dF implements IRegion {
     public void offset(float x, float y) {
         defined.x += x;
         defined.y += y;
+    }
+
+    @Override
+    public IRegion copy() {
+        return new Circle2dF(defined.x, defined.y, radius);
     }
 
 

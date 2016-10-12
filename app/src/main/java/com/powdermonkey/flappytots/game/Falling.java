@@ -13,8 +13,6 @@ import com.powdermonkey.flappytots.I2DPhysics;
 
 public class Falling extends AbstractPhysics {
     private long ts;
-    private PointF p;
-    private PointF v;
     private int frame = 0;
 
     public Falling(float x, float y) {
@@ -32,7 +30,7 @@ public class Falling extends AbstractPhysics {
         this.ts = ts;
         p.y += v.y;
         p.x += v.x;
-        sprite.updateRegions(p, 0);
+        updateCollisionRegion();
     }
 
     @Override

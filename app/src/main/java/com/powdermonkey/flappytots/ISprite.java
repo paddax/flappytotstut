@@ -5,13 +5,14 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 import com.powdermonkey.flappytots.geometry.IRegion;
+import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.List;
 
 /**
  * A sprite is an animated bitmap.  Decendents are expected to handle some incoming data determine
  * the collision regions and express frames.
- *
+ * <p>
  * Created by Peter Davis on 05/10/2016.
  */
 
@@ -20,35 +21,42 @@ public interface ISprite {
     /**
      * Obtains the collision regions from the sprite frame
      *
-     * @param frame Frame specific regions
      * @return Array of regions translated to location
      */
-    List<? extends IRegion> getRegions(int frame);
+    RegionSet getRegions();
 
     /**
-     * Determines if the sprite at location intersects with regions presented
+     * Draws the sprite at the specified location
      *
-     * @param regions Prepared regions of other sprite
-     *                @param frame frame to detect
-     *                             @param frame frame to check
-     * @return true if the sprites are colliding
+     * @param canvas Canvas to draw on
+     * @param x      X location of frame
+     * @param y      Y location of frame
+     * @param paint  Paint mechanism for sprite
+     * @param frame  Frame to draw
      */
-    boolean collide(List<? extends IRegion> regions, int frame);
-
-    /**
-     * Updates the collision regions
-     *
-     * @param p     Point representing the draw location on the screen
-     * @param frame Frame to update
-     */
-    void updateRegions(PointF p, int frame);
-
     void draw(Canvas canvas, float x, float y, Paint paint, int frame);
 
+    /**
+     * Determines the height of the current frame
+     *
+     * @param frame frame of interest
+     * @return height of frame
+     */
     int getHeight(int frame);
 
+    /**
+     * Determines the width of the current frame
+     *
+     * @param frame frame of interest
+     * @return width of frame
+     */
     int getWidth(int frame);
 
+    /**
+     * Determines the total number of frames in this sprite
+     *
+     * @return Number of frames
+     */
     int getFrameCount();
 
 }

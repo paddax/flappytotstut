@@ -8,6 +8,7 @@ import android.graphics.Rect;
 
 import com.powdermonkey.flappytots.ISprite;
 import com.powdermonkey.flappytots.geometry.IRegion;
+import com.powdermonkey.flappytots.geometry.Rect2dF;
 import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.List;
@@ -47,29 +48,12 @@ public class FrameSprite implements ISprite {
         frameWidth = width;
         frameHeight = height;
 
-        collision = new RegionSet(width, height, frames);
+        collision = new RegionSet(new Rect2dF(-width/2, -height/2, width/2, height/2), frames);
     }
 
     @Override
-    public List<? extends IRegion> getRegions(int frame) {
-        return collision.frames.get(frame % getFrameCount());
-    }
-
-    @Override
-    public boolean collide(List<? extends IRegion> regions, int frame) {
-        for (IRegion r : collision.frames.get(frame)) {
-            for (IRegion r1 : regions) {
-                if (r.intersect(r1))
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void updateRegions(PointF p, int frame) {
-        for(IRegion r: collision.frames.get(frame % getFrameCount()))
-            r.move(p);
+    public RegionSet getRegions() {
+        return collision;
     }
 
     @Override
