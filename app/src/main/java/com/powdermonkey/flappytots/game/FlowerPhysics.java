@@ -21,7 +21,7 @@ public class FlowerPhysics extends AbstractPhysics {
     private float frame;
     private FlowerSprite flower;
     private boolean collision;
-    private enum ThatsLife { LIVING, GROWING, DYING, DEAD};
+    public enum ThatsLife {WILTING, GROWING, DYING, DEAD};
     ThatsLife thatsLife;
     private long collideTime;
 
@@ -37,7 +37,7 @@ public class FlowerPhysics extends AbstractPhysics {
         v = new PointF(vx, 0);
         ts = System.currentTimeMillis();
         mode = 0;
-        thatsLife = ThatsLife.LIVING;
+        thatsLife = ThatsLife.WILTING;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class FlowerPhysics extends AbstractPhysics {
 
         if (collision || mode > 2) {
             t = (ts - collideTime) / 1000.0f; // seconds since collision
-            if (t > 0.7) {
+            if (t > 2.2) {
                 thatsLife = ThatsLife.DEAD;
                 mode = 3;
             } else if (t > 0.3) {
@@ -99,7 +99,7 @@ public class FlowerPhysics extends AbstractPhysics {
     }
 
     public void setCollision(boolean collision) {
-        if(thatsLife == ThatsLife.GROWING || thatsLife == ThatsLife.LIVING) {
+        if(thatsLife == ThatsLife.GROWING || thatsLife == ThatsLife.WILTING) {
             if (!this.collision && collision) {
                 collideTime = System.currentTimeMillis();
                 flower.setMode(0);
