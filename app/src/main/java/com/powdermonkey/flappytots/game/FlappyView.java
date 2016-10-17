@@ -25,8 +25,11 @@ import java.util.Iterator;
 public class FlappyView extends SurfaceView implements Runnable {
     private final Paint paint;
     private final RegionSet pighit;
+    private final Bitmap obsticle2;
+    private final Bitmap obsticle3;
+    private final Bitmap obsticle4;
     private FrameSprite pig;
-    private RotateSprite flower;
+    private FlowerSprite flower;
     private final Bitmap obsticle1;
     private final Bitmap pigbm;
     private FlappyPhysics physics;
@@ -41,7 +44,7 @@ public class FlappyView extends SurfaceView implements Runnable {
     private long time;
 
 
-    private ArrayList<MovingLeft> objects;
+    private ArrayList<FlowerPhysics> objects;
     private boolean hit;
     private long nextFrame;
 
@@ -52,7 +55,10 @@ public class FlappyView extends SurfaceView implements Runnable {
         holder = getHolder();
         paint = new Paint();
         pigbm = BitmapFactory.decodeResource(this.getResources(), res);
-        obsticle1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+        obsticle1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower80);
+        obsticle2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower90);
+        obsticle3 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+        obsticle4 = BitmapFactory.decodeResource(this.getResources(), R.drawable.poof);
 
         pighit = new RegionSet(context, R.raw.piggledy_hit);
 
@@ -68,7 +74,8 @@ public class FlappyView extends SurfaceView implements Runnable {
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 surfaceWidth = width;
                 surfaceHeight = height;
-                flower = new RotateSprite(obsticle1, surfaceHeight / 4, surfaceHeight / 4, 30);
+                flower = new FlowerSprite(obsticle1, surfaceHeight / 4, surfaceHeight / 4, 30);
+                flower.setModeBitmaps(obsticle2, obsticle3, obsticle4);
                 pig = new FrameSprite(pigbm, surfaceHeight / 4, surfaceHeight / 5, 5);
                 pig.setRegions(pighit);
                 physics = new FlappyPhysics(width, height);
@@ -128,7 +135,7 @@ public class FlappyView extends SurfaceView implements Runnable {
 
 
             //draw the background objects
-            for(MovingLeft o: objects) {
+            for(FlowerPhysics o: objects) {
                 o.draw(canvas, paint);
             }
 
@@ -163,14 +170,14 @@ public class FlappyView extends SurfaceView implements Runnable {
                 // Randomly determine when next flower occurs (this should not be frame based but time based)
                 nextFrame =  frame + 40 + Math.round(Math.random() * 60);
                 // construct a new obstacle somewhere off the right of the screen
-                MovingLeft o = new MovingLeft(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
+                FlowerPhysics o = new FlowerPhysics(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
                 o.setSprite(flower);
                 objects.add(o);
             }
 
             // update the list of obstacles
-            for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
-                MovingLeft o = i.next();
+            for (Iterator<FlowerPhysics> i = objects.iterator(); i.hasNext(); ) {
+                FlowerPhysics o = i.next();
                 o.update(time);
                 if(o.getPoint().x < -o.getSprite().getWidth(o.getFrame())) {
                     i.remove();
@@ -189,13 +196,13 @@ public class FlappyView extends SurfaceView implements Runnable {
             }
 */
             physics.updateRegions();
-            for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
-                MovingLeft ml = i.next();
+            for (Iterator<FlowerPhysics> i = objects.iterator(); i.hasNext(); ) {
+                FlowerPhysics ml = i.next();
                 ml.updateRegions();
-                if(physics.collide(ml.getRegions())) {
+                ml.setCollision(physics.collide(ml.getRegions()));
+                if(ml.isDead()) {
                     i.remove();
                 }
-
             }
 
 
