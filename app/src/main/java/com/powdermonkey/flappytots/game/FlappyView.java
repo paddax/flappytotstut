@@ -27,7 +27,6 @@ public class FlappyView extends SurfaceView implements Runnable {
     private final RegionSet pighit;
     private final Bitmap obsticle2;
     private final Bitmap obsticle3;
-    private final Bitmap obsticle4;
     private FrameSprite pig;
     private FlowerSprite flower;
     private final Bitmap obsticle1;
@@ -48,6 +47,7 @@ public class FlappyView extends SurfaceView implements Runnable {
     private ArrayList<FlowerPhysics> objects;
     private boolean hit;
     private long nextFrame;
+    private Bitmap[] dying = new Bitmap[4];
 
 
     public FlappyView(Context context, int res) {
@@ -59,7 +59,10 @@ public class FlappyView extends SurfaceView implements Runnable {
         obsticle1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.wilted);
         obsticle2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower90);
         obsticle3 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
-        obsticle4 = BitmapFactory.decodeResource(this.getResources(), R.drawable.poof);
+        dying[0] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof1_240);
+        dying[1] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof2_240);
+        dying[2] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof3_240);
+        dying[3] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof4_240);
 
         pighit = new RegionSet(context, R.raw.piggledy_hit);
 
@@ -76,7 +79,7 @@ public class FlappyView extends SurfaceView implements Runnable {
                 surfaceWidth = width;
                 surfaceHeight = height;
                 flower = new FlowerSprite(obsticle1, surfaceHeight / 4, surfaceHeight / 4, 30);
-                flower.setModeBitmaps(obsticle2, obsticle3, obsticle4);
+                flower.setModeBitmaps(obsticle2, obsticle3, dying);
                 pig = new FrameSprite(pigbm, surfaceHeight / 4, surfaceHeight / 5, 5);
                 pig.setRegions(pighit);
                 physics = new FlappyPhysics(width, height);
@@ -138,6 +141,13 @@ public class FlappyView extends SurfaceView implements Runnable {
             paint.setStyle(Paint.Style.STROKE);
             //draw the background objects
             for(FlowerPhysics o: objects) {
+                if(o.getMode() >= 3) {
+                    int alpha = 200 - ((o.getMode() - 3) * 67);
+                    if(alpha < 0)
+                        alpha = 0;
+                    paint.setAlpha(alpha);
+                } else
+                    paint.setAlpha(255);
                 o.draw(canvas, paint);
             }
 
@@ -185,9 +195,10 @@ public class FlappyView extends SurfaceView implements Runnable {
                     i.remove();
                     switch(o.thatsLife) {
                         case GROWING:
-                            score++;
+                            score+=4;
                             break;
                         case WILTING:
+                            score-=2;
                         case DYING:
                         case DEAD:
                             score--;

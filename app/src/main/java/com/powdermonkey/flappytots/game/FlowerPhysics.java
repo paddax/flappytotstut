@@ -21,6 +21,7 @@ public class FlowerPhysics extends AbstractPhysics {
     private float frame;
     private FlowerSprite flower;
     private boolean collision;
+
     public enum ThatsLife {WILTING, GROWING, DYING, DEAD};
     ThatsLife thatsLife;
     private long collideTime;
@@ -51,13 +52,16 @@ public class FlowerPhysics extends AbstractPhysics {
 
         if (collision || mode > 2) {
             t = (ts - collideTime) / 1000.0f; // seconds since collision
-            if (t > 2.2) {
-                thatsLife = ThatsLife.DEAD;
-                mode = 3;
+            if (t > 0.45) {
+                mode = 6;
+            } else if (t > 0.4) {
+                mode = 5;
+            } else if (t > 0.35) {
+                mode = 4;
             } else if (t > 0.3) {
                 mode = 3;
                 thatsLife = ThatsLife.DYING;
-            } else if (t > 0.) {
+            } else if (t > 0.15) {
                 thatsLife = ThatsLife.GROWING;
                 mode = 2;
             } else {
@@ -109,6 +113,10 @@ public class FlowerPhysics extends AbstractPhysics {
             }
             this.collision = collision;
         }
+    }
+
+    public int getMode() {
+        return mode;
     }
 
     public boolean isDead() {

@@ -23,7 +23,7 @@ import java.util.List;
 
 public class FlowerSprite implements ISprite {
 
-    private final Bitmap image[] = new Bitmap[4];
+    private final Bitmap image[] = new Bitmap[7];
     private final int frames;
     private final int height;
     private final int width;
@@ -41,15 +41,18 @@ public class FlowerSprite implements ISprite {
         this.frames = frames;
         this.width  = width;
         this.height = height;
-        regions = new RegionSet(new Circle2dF(0,0,width*5/13), frames);
+        regions = new RegionSet(new Circle2dF(0,0,width*6/13), frames);
 
         image[0] = Bitmap.createScaledBitmap(src, width, height, true);
     }
 
-    public void setModeBitmaps(Bitmap g1, Bitmap g2, Bitmap e1) {
+    public void setModeBitmaps(Bitmap g1, Bitmap g2, Bitmap[] e1) {
         image[1] = Bitmap.createScaledBitmap(g1, width, height, true);
         image[2] = Bitmap.createScaledBitmap(g2, width, height, true);
-        image[3] = Bitmap.createScaledBitmap(e1, width, height, true);
+        image[3] = Bitmap.createScaledBitmap(e1[0], width, height, true);
+        image[4] = Bitmap.createScaledBitmap(e1[1], width, height, true);
+        image[5] = Bitmap.createScaledBitmap(e1[2], width, height, true);
+        image[6] = Bitmap.createScaledBitmap(e1[3], width, height, true);
     }
 
     public void setMode(int mode) {
@@ -65,7 +68,7 @@ public class FlowerSprite implements ISprite {
     public void draw(Canvas canvas, float x, float y, Paint paint, int frame) {
         int i = frame % frames;
         Matrix matrix = new Matrix();
-        if(mode != 3)
+        if(mode < 3)
             matrix.postRotate(360.0f * i / frames, width / 2, height / 2);
         matrix.postTranslate(x - (width >> 1), y - (height >> 1));
         canvas.drawBitmap(image[mode], matrix, paint);
