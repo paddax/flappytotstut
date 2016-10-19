@@ -25,14 +25,17 @@ import java.util.Iterator;
 public class FlappyView extends SurfaceView implements Runnable {
     private final Paint paint;
     private final RegionSet pighit;
+    private final Bitmap obsticle2;
+    private final Bitmap obsticle3;
     private FrameSprite pig;
-    private RotateSprite flower;
+    private FlowerSprite flower;
     private final Bitmap obsticle1;
     private final Bitmap pigbm;
     private FlappyPhysics physics;
     private final SurfaceHolder holder;
     private int surfaceHeight;
     private int surfaceWidth;
+    private int score;
 
     private boolean playing;
     private float framesPerSecond;
@@ -41,9 +44,10 @@ public class FlappyView extends SurfaceView implements Runnable {
     private long time;
 
 
-    private ArrayList<MovingLeft> objects;
+    private ArrayList<FlowerPhysics> objects;
     private boolean hit;
     private long nextFrame;
+    private Bitmap[] dying = new Bitmap[4];
 
 
     public FlappyView(Context context, int res) {
@@ -52,7 +56,13 @@ public class FlappyView extends SurfaceView implements Runnable {
         holder = getHolder();
         paint = new Paint();
         pigbm = BitmapFactory.decodeResource(this.getResources(), res);
-        obsticle1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+        obsticle1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.wilted);
+        obsticle2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower90);
+        obsticle3 = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower);
+        dying[0] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof1_240);
+        dying[1] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof2_240);
+        dying[2] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof3_240);
+        dying[3] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof4_240);
 
         pighit = new RegionSet(context, R.raw.piggledy_hit);
 
@@ -68,7 +78,8 @@ public class FlappyView extends SurfaceView implements Runnable {
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 surfaceWidth = width;
                 surfaceHeight = height;
-                flower = new RotateSprite(obsticle1, surfaceHeight / 4, surfaceHeight / 4, 30);
+                flower = new FlowerSprite(obsticle1, surfaceHeight / 4, surfaceHeight / 4, 30);
+                flower.setModeBitmaps(obsticle2, obsticle3, dying);
                 pig = new FrameSprite(pigbm, surfaceHeight / 4, surfaceHeight / 5, 5);
                 pig.setRegions(pighit);
                 physics = new FlappyPhysics(width, height);
@@ -120,15 +131,23 @@ public class FlappyView extends SurfaceView implements Runnable {
             paint.setColor(Color.argb(255, 156, 112, 233));
 
             paint.setAlpha(255);
-            paint.setStyle(Paint.Style.STROKE);
-
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
             // Display the current fps on the screen
-            canvas.drawText("FPS:" + Math.round(framesPerSecond), 20, 40, paint);
+            //canvas.drawText("FPS:" + Math.round(framesPerSecond), 20, 40, paint);
+            canvas.drawText("SCORE:" + score, 20, 40, paint);
 
 
+            paint.setStyle(Paint.Style.STROKE);
             //draw the background objects
-            for(MovingLeft o: objects) {
+            for(FlowerPhysics o: objects) {
+                if(o.getMode() >= 3) {
+                    int alpha = 200 - ((o.getMode() - 3) * 67);
+                    if(alpha < 0)
+                        alpha = 0;
+                    paint.setAlpha(alpha);
+                } else
+                    paint.setAlpha(255);
                 o.draw(canvas, paint);
             }
 
@@ -163,17 +182,28 @@ public class FlappyView extends SurfaceView implements Runnable {
                 // Randomly determine when next flower occurs (this should not be frame based but time based)
                 nextFrame =  frame + 40 + Math.round(Math.random() * 60);
                 // construct a new obstacle somewhere off the right of the screen
-                MovingLeft o = new MovingLeft(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
+                FlowerPhysics o = new FlowerPhysics(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
                 o.setSprite(flower);
                 objects.add(o);
             }
 
             // update the list of obstacles
-            for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
-                MovingLeft o = i.next();
+            for (Iterator<FlowerPhysics> i = objects.iterator(); i.hasNext(); ) {
+                FlowerPhysics o = i.next();
                 o.update(time);
                 if(o.getPoint().x < -o.getSprite().getWidth(o.getFrame())) {
                     i.remove();
+                    switch(o.thatsLife) {
+                        case GROWING:
+                            score+=4;
+                            break;
+                        case WILTING:
+                            score-=2;
+                        case DYING:
+                        case DEAD:
+                            score--;
+                            break;
+                    }
                 }
             }
 
@@ -189,13 +219,13 @@ public class FlappyView extends SurfaceView implements Runnable {
             }
 */
             physics.updateRegions();
-            for (Iterator<MovingLeft> i = objects.iterator(); i.hasNext(); ) {
-                MovingLeft ml = i.next();
+            for (Iterator<FlowerPhysics> i = objects.iterator(); i.hasNext(); ) {
+                FlowerPhysics ml = i.next();
                 ml.updateRegions();
-                if(physics.collide(ml.getRegions())) {
+                ml.setCollision(physics.collide(ml.getRegions()));
+                if(ml.isDead()) {
                     i.remove();
                 }
-
             }
 
 
@@ -229,8 +259,6 @@ public class FlappyView extends SurfaceView implements Runnable {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                float x = event.getX();
-                float y = event.getY();
                 physics.impulse(time);
                 physics.glide(true);
                 break;
