@@ -23,6 +23,11 @@ public interface I2DPhysics {
 
     PointF getVector();
 
+    /**
+     * Sets the active vector of the sprite
+      * @param x X component of vector
+     * @param y Y component of vector
+     */
     void setVector(float x, float y);
 
     /**
