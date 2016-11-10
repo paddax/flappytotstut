@@ -48,6 +48,8 @@ public class FlappyView extends SurfaceView implements Runnable {
     private boolean hit;
     private long nextFrame;
     private Bitmap[] dying = new Bitmap[4];
+    private MovingLeft[] floors;
+    private final FrameSprite floor;
 
 
     public FlappyView(Context context, int res) {
@@ -63,6 +65,7 @@ public class FlappyView extends SurfaceView implements Runnable {
         dying[1] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof2_240);
         dying[2] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof3_240);
         dying[3] = BitmapFactory.decodeResource(this.getResources(), R.drawable.blowpoof4_240);
+        floor = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.repeatable_floor_300), 300, 178, 1);
 
         pighit = new RegionSet(context, R.raw.piggledy_hit);
 
@@ -85,6 +88,11 @@ public class FlappyView extends SurfaceView implements Runnable {
                 physics = new FlappyPhysics(width, height);
                 physics.setPoint(width / 4, height / 2);
                 physics.setSprite(pig);
+                floors = new MovingLeft[width / floor.getWidth(0) + 2];
+                for(int i=0; i<floors.length; i++) {
+                    floors[i] = new MovingLeft(i * floor.getWidth(0) + (floor.getWidth(0) / 2), height - (floor.getHeight(0) / 2), -surfaceWidth / 4);
+                    floors[i].setSprite(floor);
+                }
             }
 
             @Override
@@ -132,6 +140,10 @@ public class FlappyView extends SurfaceView implements Runnable {
 
             paint.setAlpha(255);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+            for(int i=0; i<floors.length; i++) {
+                floors[i].draw(canvas, paint);
+            }
 
             // Display the current fps on the screen
             //canvas.drawText("FPS:" + Math.round(framesPerSecond), 20, 40, paint);
@@ -185,6 +197,13 @@ public class FlappyView extends SurfaceView implements Runnable {
                 FlowerPhysics o = new FlowerPhysics(surfaceWidth + 100, (float) (Math.random() * surfaceHeight), -surfaceWidth / 4);
                 o.setSprite(flower);
                 objects.add(o);
+            }
+
+            for(int i=0; i<floors.length; i++) {
+                floors[i].update(time);
+                if(floors[i].getPoint().x < -(floors[i].getSprite().getWidth(0) / 2)) {
+                    floors[i].getPoint().x += floors[i].getSprite().getWidth(0) * floors.length;
+                }
             }
 
             // update the list of obstacles
