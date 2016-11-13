@@ -27,7 +27,7 @@ public class FrameSprite implements ISprite {
     private Rect where;
     private RegionSet collision;
     private Point2f size;
-    private Point2f offset;
+    private Point2f[] offset;
 
     /**
      * The src bitmap is rescaled to (width  * frames) and height
@@ -44,10 +44,16 @@ public class FrameSprite implements ISprite {
         where = new Rect(0, 0, width, height);
         frameCount = frames;
         size = new Point2f(width, height);
-        offset = new Point2f(size);
-        offset.scale(0.5f);
+        offset = new Point2f[frames];
+        for(int i=0; i<offset.length; i++) {
+            offset[i] = new Point2f(size);
+            offset[i].scale(0.5f);
+        }
 
-        collision = new RegionSet(new Rect2dF(-offset.x, -offset.y, offset.x, offset.y), frames);
+        collision = new RegionSet(new Rect2dF(-offset[0].x, -offset[0].y, offset[0].x, offset[0].y), frames);
+        for(int i=0; i<offset.length; i++) {
+            collision.frames.get(i);
+        }
     }
 
     @Override
@@ -59,9 +65,11 @@ public class FrameSprite implements ISprite {
     public void draw(Canvas canvas, float x, float y, Paint paint, int frame) {
         int i = frame % frameCount;
         from.left = (int) (i * size.x);
-        from.right = (int) (from.left + size.y);
+        from.right = (int) (from.left + size.x);
 
-        where.set((int)(x - offset.x), (int)(y - offset.y),(int)( x + offset.x), (int) (y + offset.y));
+        int nx = (int) (x - offset[frame].x);
+        int ny = (int)(y - offset[frame].y);
+        where.set(nx, ny, (int) (nx + size.x), (int) (ny + size.y));
 
         canvas.drawBitmap(image,
                 from,
@@ -88,7 +96,7 @@ public class FrameSprite implements ISprite {
 
     @Override
     public Point2f getOffset(int frame) {
-        return offset;
+        return offset[frame];
     }
 
     public void setRegions(RegionSet regions) {
@@ -97,5 +105,9 @@ public class FrameSprite implements ISprite {
         this.collision.offset(size.x / -2.0f, size.y / -2.0f);
         if(collision.frames.size() < getFrameCount())
             throw new RuntimeException("Invalid frame count");
+    }
+
+    public void setOffset(int frame, Point2f o) {
+        offset[frame].set(o);
     }
 }

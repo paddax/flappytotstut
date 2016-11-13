@@ -92,6 +92,12 @@ public class RegionSet {
         }
     }
 
+    public void offset(int regind, float x, float y) {
+        for(IRegion r: frames.get(regind)) {
+            r.offset(x, y);
+        }
+    }
+
     public void offset(float x, float y) {
         for(List<IRegion> frame: frames) {
             for(IRegion r: frame) {

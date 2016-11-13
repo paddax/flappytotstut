@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.powdermonkey.flappytots.ISprite;
 import com.powdermonkey.flappytots.R;
 import com.powdermonkey.flappytots.gameold.FPS;
 import com.powdermonkey.flappytots.gameold.FlowerPhysics;
@@ -18,6 +19,11 @@ import com.powdermonkey.flappytots.gameold.FrameSprite;
 import com.powdermonkey.flappytots.gameold.MovingLeft;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.vecmath.Point2f;
+import javax.vecmath.Vector2f;
 
 /**
  * Game view
@@ -34,7 +40,7 @@ public class FlappyView extends SurfaceView implements Runnable {
     private float framesPerSecond;
     private Thread gameThread;
     private FPS fps;
-    private long time;
+    private long time, newflower;
     private int score;
 
 
@@ -46,6 +52,9 @@ public class FlappyView extends SurfaceView implements Runnable {
     private FrameSprite floor;
     private boolean ready = false;
     private Foreground foreground;
+    private List<DroopFlowerPhysics> flowers = new ArrayList<>();
+    private FrameSprite flower;
+    private FrameSprite stem;
 
 
     public FlappyView(Context context, int res) {
@@ -54,6 +63,8 @@ public class FlappyView extends SurfaceView implements Runnable {
         holder = getHolder();
         paint = new Paint();
         final Bitmap floorbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.repeatable_floor_500);
+        final Bitmap flowerbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower_frames_300);
+        final Bitmap stembm = BitmapFactory.decodeResource(this.getResources(), R.drawable.stem);
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -65,8 +76,11 @@ public class FlappyView extends SurfaceView implements Runnable {
                 surfaceWidth = width;
                 surfaceHeight = height;
 
+                flower = new FrameSprite(flowerbm, surfaceWidth / 10, surfaceHeight / 10, 2);
+                stem = new FrameSprite(stembm, surfaceWidth / 100, surfaceHeight, 1);
                 foreground = new Foreground(floorbm, width, height, 4);
-
+                time = System.currentTimeMillis();
+                newflower = time + 1000;
                 ready = true;
             }
 
@@ -118,6 +132,11 @@ public class FlappyView extends SurfaceView implements Runnable {
 
             foreground.draw(canvas, paint);
 
+            synchronized (flowers) {
+                for (DroopFlowerPhysics dfp : flowers) {
+                    dfp.draw(canvas, paint);
+                }
+            }
             // Draw everything to the screen
             holder.unlockCanvasAndPost(canvas);
         }
@@ -128,9 +147,28 @@ public class FlappyView extends SurfaceView implements Runnable {
      * Runs the game logic updating position and state of all players
      */
     private void update() {
-        if(ready) {
+        if (ready) {
             time = System.currentTimeMillis();
             foreground.update(time);
+
+            synchronized (flowers) {
+                if (time > newflower) {
+                    Point2f px = new Point2f(surfaceWidth + 100, (float) ((Math.random() * surfaceHeight / 2) + (surfaceHeight / 10)));
+                    Vector2f vx = new Vector2f(-surfaceWidth / 4, 0);
+                    DroopFlowerPhysics f = new DroopFlowerPhysics(flower, stem, px, vx);
+                    flowers.add(f);
+                    newflower = time + 1000;
+                }
+            }
+
+            for(Iterator<DroopFlowerPhysics> it = flowers.iterator(); it.hasNext();) {
+                DroopFlowerPhysics dfp = it.next();
+                dfp.update(time);
+                if(dfp.getPoint().x < -dfp.getSize().x / 2) {
+                    it.remove();
+                }
+            }
+
             frame++;
         }
     }
