@@ -1,15 +1,16 @@
-package com.powdermonkey.flappytots.game;
+package com.powdermonkey.flappytots.gameold;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PointF;
 
 import com.powdermonkey.flappytots.AbstractPhysics;
-import com.powdermonkey.flappytots.ISprite;
 import com.powdermonkey.flappytots.geometry.IRegion;
 import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.List;
+
+import javax.vecmath.Point2f;
+import javax.vecmath.Vector2f;
 
 /**
  * Created by Peter Davis on 09/10/2016.
@@ -34,8 +35,8 @@ public class FlowerPhysics extends AbstractPhysics {
      * @param vx Vector magnitude of Y in pixels per second
      */
     public FlowerPhysics(float x, float y, float vx) {
-        p = new PointF(x, y);
-        v = new PointF(vx, 0);
+        p = new Point2f(x, y);
+        v = new Vector2f(vx, 0);
         ts = System.currentTimeMillis();
         mode = 0;
         thatsLife = ThatsLife.WILTING;
@@ -48,7 +49,7 @@ public class FlowerPhysics extends AbstractPhysics {
         p.y += (v.y * t);
 
         frame += ((ts - this.ts) / 50.0f);
-        frame %= sprite.getFrameCount();
+        frame %= flower.getFrameCount();
 
         if (collision || mode > 2) {
             t = (ts - collideTime) / 1000.0f; // seconds since collision
@@ -72,15 +73,9 @@ public class FlowerPhysics extends AbstractPhysics {
         this.ts = ts;
     }
 
-    @Override
-    public void setSprite(ISprite sprite) {
-        if (sprite instanceof FlowerSprite) {
-            this.sprite = sprite;
-            this.flower = (FlowerSprite) sprite;
-            regions = new RegionSet(sprite.getRegions());
-        } else {
-            throw new RuntimeException("FlowerPhysics requires FlowerSprite");
-        }
+    public void setSprite(FlowerSprite sprite) {
+        this.flower = sprite;
+        regions = new RegionSet(sprite.getRegions());
     }
 
 
@@ -90,9 +85,19 @@ public class FlowerPhysics extends AbstractPhysics {
     }
 
     @Override
+    public Point2f getSize() {
+        return flower.getSize((int) frame);
+    }
+
+    @Override
+    public Point2f getOffset() {
+        return flower.getOffset((int) frame);
+    }
+
+    @Override
     public void draw(Canvas canvas, Paint paint) {
         flower.setMode(mode);
-        sprite.draw(canvas, p.x, p.y, paint, (int) frame);
+        flower.draw(canvas, p.x, p.y, paint, (int) frame);
 
         if(drawCollisionRegions) {
             List<? extends IRegion> rr = regions.frames.get(getFrame());

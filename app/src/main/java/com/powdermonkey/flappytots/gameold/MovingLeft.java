@@ -1,14 +1,17 @@
-package com.powdermonkey.flappytots.game;
+package com.powdermonkey.flappytots.gameold;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PointF;
 
 import com.powdermonkey.flappytots.AbstractPhysics;
 import com.powdermonkey.flappytots.ISprite;
 import com.powdermonkey.flappytots.geometry.IRegion;
+import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.List;
+
+import javax.vecmath.Point2f;
+import javax.vecmath.Vector2f;
 
 /**
  * Created by Peter Davis on 09/10/2016.
@@ -17,6 +20,7 @@ public class MovingLeft extends AbstractPhysics {
 
     private long ts;
     private float frame;
+    private ISprite sprite;
 
     /**
      * Constructs an object that moves left across the screen
@@ -26,8 +30,8 @@ public class MovingLeft extends AbstractPhysics {
      * @param vx Vector magnitude of Y in pixels per second
      */
     public MovingLeft(float x, float y, float vx) {
-        p = new PointF(x, y);
-        v = new PointF(vx, 0);
+        p = new Point2f(x, y);
+        v = new Vector2f(vx, 0);
         ts = System.currentTimeMillis();
     }
 
@@ -43,9 +47,25 @@ public class MovingLeft extends AbstractPhysics {
         this.ts = ts;
     }
 
+    public void setSprite(ISprite sprite) {
+        this.sprite = sprite;
+        regions = new RegionSet(sprite.getRegions());
+    }
+
+
     @Override
     public int getFrame() {
         return (int) frame;
+    }
+
+    @Override
+    public Point2f getSize() {
+        return sprite.getSize((int) frame);
+    }
+
+    @Override
+    public Point2f getOffset() {
+        return sprite.getOffset((int) frame);
     }
 
     @Override

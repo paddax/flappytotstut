@@ -5,19 +5,21 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import javax.vecmath.Point2f;
+
 /**
  * Created by Peter Davis on 07/10/2016.
  */
 
 public class Circle2dF implements IRegion {
 
-    private PointF defined;
-    private PointF center;
+    private Point2f defined;
+    private Point2f center;
     private float radius;
 
     public Circle2dF(float x, float y, float r) {
-        this.center = new PointF(x, y);
-        this.defined = new PointF(x, y);
+        this.center = new Point2f(x, y);
+        this.defined = new Point2f(x, y);
         this.radius = r;
     }
 
@@ -38,11 +40,12 @@ public class Circle2dF implements IRegion {
     @Override
     public void move(float x, float y) {
         center.set(defined);
-        center.offset(x, y);
+        center.x += x;
+        center.y += y;
     }
 
     @Override
-    public void move(PointF p) {
+    public void move(Point2f p) {
         move(p.x, p.y);
     }
 

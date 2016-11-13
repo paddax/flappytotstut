@@ -1,19 +1,15 @@
-package com.powdermonkey.flappytots.game;
+package com.powdermonkey.flappytots.gameold;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PointF;
 
 import com.powdermonkey.flappytots.ISprite;
 import com.powdermonkey.flappytots.geometry.Circle2dF;
-import com.powdermonkey.flappytots.geometry.IRegion;
-import com.powdermonkey.flappytots.geometry.Rect2dF;
 import com.powdermonkey.flappytots.geometry.RegionSet;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.vecmath.Point2f;
 
 /**
  * Creates an animated rotatable image from a single image.
@@ -25,8 +21,8 @@ public class FlowerSprite implements ISprite {
 
     private final Bitmap image[] = new Bitmap[7];
     private final int frames;
-    private final int height;
-    private final int width;
+    private Point2f size;
+    private Point2f offset;
     private RegionSet regions;
     private int mode;
 
@@ -39,20 +35,21 @@ public class FlowerSprite implements ISprite {
      */
     public FlowerSprite(Bitmap src, int width, int height, int frames) {
         this.frames = frames;
-        this.width  = width;
-        this.height = height;
+        size = new Point2f(width, height);
+        offset = new Point2f(size);
+        offset.scale(0.5f);
         regions = new RegionSet(new Circle2dF(0,0,width*6/13), frames);
 
         image[0] = Bitmap.createScaledBitmap(src, width, height, true);
     }
 
     public void setModeBitmaps(Bitmap g1, Bitmap g2, Bitmap[] e1) {
-        image[1] = Bitmap.createScaledBitmap(g1, width, height, true);
-        image[2] = Bitmap.createScaledBitmap(g2, width, height, true);
-        image[3] = Bitmap.createScaledBitmap(e1[0], width, height, true);
-        image[4] = Bitmap.createScaledBitmap(e1[1], width, height, true);
-        image[5] = Bitmap.createScaledBitmap(e1[2], width, height, true);
-        image[6] = Bitmap.createScaledBitmap(e1[3], width, height, true);
+        image[1] = Bitmap.createScaledBitmap(g1, (int)size.x, (int) size.y, true);
+        image[2] = Bitmap.createScaledBitmap(g2, (int)size.x, (int) size.y, true);
+        image[3] = Bitmap.createScaledBitmap(e1[0], (int)size.x, (int) size.y, true);
+        image[4] = Bitmap.createScaledBitmap(e1[1], (int)size.x, (int) size.y, true);
+        image[5] = Bitmap.createScaledBitmap(e1[2], (int)size.x, (int) size.y, true);
+        image[6] = Bitmap.createScaledBitmap(e1[3], (int)size.x, (int) size.y, true);
     }
 
     public void setMode(int mode) {
@@ -68,9 +65,9 @@ public class FlowerSprite implements ISprite {
     public void draw(Canvas canvas, float x, float y, Paint paint, int frame) {
         int i = frame % frames;
         Matrix matrix = new Matrix();
-        if(mode < 3)
-            matrix.postRotate(360.0f * i / frames, width / 2, height / 2);
-        matrix.postTranslate(x - (width >> 1), y - (height >> 1));
+        if(mode < -1)
+            matrix.postRotate(360.0f * i / frames, offset.x, offset.y);
+        matrix.postTranslate(x - (offset.x), y - (offset.y));
         canvas.drawBitmap(image[mode], matrix, paint);
     }
 
@@ -81,10 +78,20 @@ public class FlowerSprite implements ISprite {
     }
 
     public int getHeight(int frame) {
-        return height;
+        return (int)size.y;
     }
     public int getWidth(int frame) {
-        return width;
+        return (int)size.x;
+    }
+
+    @Override
+    public Point2f getSize(int frame) {
+        return size;
+    }
+
+    @Override
+    public Point2f getOffset(int frame) {
+        return offset;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.powdermonkey.flappytots.game;
+package com.powdermonkey.flappytots.gameold;
 
 /**
  * Created by Peter Davis on 05/10/2016.

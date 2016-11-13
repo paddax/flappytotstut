@@ -3,7 +3,7 @@ package com.powdermonkey.flappytots;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.powdermonkey.flappytots.game.GameView;
+import com.powdermonkey.flappytots.gameold.GameView;
 
 public class GameActivity extends AppCompatActivity {
 

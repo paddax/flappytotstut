@@ -1,19 +1,16 @@
-package com.powdermonkey.flappytots.game;
+package com.powdermonkey.flappytots.gameold;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PointF;
 
 import com.powdermonkey.flappytots.ISprite;
 import com.powdermonkey.flappytots.geometry.Circle2dF;
-import com.powdermonkey.flappytots.geometry.IRegion;
-import com.powdermonkey.flappytots.geometry.Rect2dF;
 import com.powdermonkey.flappytots.geometry.RegionSet;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.vecmath.Point2f;
+
 
 /**
  * Creates an animated rotatable image from a single image.
@@ -25,6 +22,8 @@ public class RotateSprite implements ISprite {
 
     private final Bitmap[] images;
     private RegionSet regions;
+    private Point2f size = new Point2f();
+    private Point2f offset = new Point2f();
 
     /**
      * The src bitmap is rescaled too width and height
@@ -67,6 +66,20 @@ public class RotateSprite implements ISprite {
     }
     public int getWidth(int frame) {
         return images[frame % images.length].getWidth();
+    }
+
+    @Override
+    public Point2f getSize(int frame) {
+        Bitmap x = images[frame % images.length];
+        size.set(x.getWidth(), x.getHeight());
+        return size;
+    }
+
+    @Override
+    public Point2f getOffset(int frame) {
+        Bitmap x = images[frame % images.length];
+        offset.set(x.getWidth() / 2, x.getHeight() / 2);
+        return offset;
     }
 
 }
