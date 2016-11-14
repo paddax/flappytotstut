@@ -55,6 +55,8 @@ public class FlappyView extends SurfaceView implements Runnable {
     private List<DroopFlowerPhysics> flowers = new ArrayList<>();
     private FrameSprite flower;
     private FrameSprite stem;
+    private FrameSprite beesprite;
+    private BeePhysics bee;
 
 
     public FlappyView(Context context, int res) {
@@ -65,6 +67,7 @@ public class FlappyView extends SurfaceView implements Runnable {
         final Bitmap floorbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.repeatable_floor_500);
         final Bitmap flowerbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower_frames_300);
         final Bitmap stembm = BitmapFactory.decodeResource(this.getResources(), R.drawable.stem);
+        final Bitmap beebm =  BitmapFactory.decodeResource(this.getResources(), R.drawable.simple_bee_300);
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -79,8 +82,11 @@ public class FlappyView extends SurfaceView implements Runnable {
                 flower = new FrameSprite(flowerbm, surfaceWidth / 10, surfaceHeight / 10, 2);
                 stem = new FrameSprite(stembm, surfaceWidth / 100, surfaceHeight, 1);
                 foreground = new Foreground(floorbm, width, height, 4);
+                beesprite = new FrameSprite(beebm, surfaceWidth / 10, surfaceHeight / 10, 1);
+                bee = new BeePhysics(beesprite, surfaceHeight);
+                bee.setPoint(surfaceWidth / 3, surfaceHeight / 2);
                 time = System.currentTimeMillis();
-                newflower = time + 1000;
+                newflower = time + Math.round(800) + 1000;
                 ready = true;
             }
 
@@ -137,6 +143,7 @@ public class FlappyView extends SurfaceView implements Runnable {
                     dfp.draw(canvas, paint);
                 }
             }
+            bee.draw(canvas, paint);
             // Draw everything to the screen
             holder.unlockCanvasAndPost(canvas);
         }
@@ -150,6 +157,7 @@ public class FlappyView extends SurfaceView implements Runnable {
         if (ready) {
             time = System.currentTimeMillis();
             foreground.update(time);
+            bee.update(time);
 
             synchronized (flowers) {
                 if (time > newflower) {
@@ -198,6 +206,13 @@ public class FlappyView extends SurfaceView implements Runnable {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                bee.impulse(time);
+                bee.glide(true);
+                break;
+            case MotionEvent.ACTION_UP:
+                bee.glide(false);
+                break;
         }
 
         return true;
