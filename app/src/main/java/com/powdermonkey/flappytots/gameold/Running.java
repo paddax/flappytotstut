@@ -18,6 +18,7 @@ public class Running extends AbstractPhysics {
     private long ts;
     private float frame = 0;
     private ISprite sprite;
+    private RegionSet regions;
 
     public Running(float x, float y) {
         p = new Point2f(x, y);

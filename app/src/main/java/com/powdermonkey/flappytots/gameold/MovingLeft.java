@@ -21,6 +21,7 @@ public class MovingLeft extends AbstractPhysics {
     private long ts;
     private float frame;
     private ISprite sprite;
+    private RegionSet regions;
 
     /**
      * Constructs an object that moves left across the screen

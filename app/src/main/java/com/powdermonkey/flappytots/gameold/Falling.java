@@ -5,7 +5,10 @@ import android.graphics.Paint;
 
 import com.powdermonkey.flappytots.AbstractPhysics;
 import com.powdermonkey.flappytots.ISprite;
+import com.powdermonkey.flappytots.geometry.IRegion;
 import com.powdermonkey.flappytots.geometry.RegionSet;
+
+import java.util.List;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
@@ -18,6 +21,7 @@ public class Falling extends AbstractPhysics {
     private long ts;
     private int frame = 0;
     private ISprite sprite;
+    private RegionSet regions;
 
     public Falling(float x, float y) {
         p = new Point2f(x, y);
@@ -62,4 +66,12 @@ public class Falling extends AbstractPhysics {
         sprite.draw(canvas, p.x, p.y, paint, (int) frame);
     }
 
+    /**
+     * Updates the collision regions based on the location of the sprite
+     */
+    public void updateCollisionRegion() {
+        List<IRegion> x1 = regions.frames.get(getFrame() % regions.frames.size());
+        for (IRegion r : x1)
+            r.move(p);
+    }
 }

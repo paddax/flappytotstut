@@ -1,10 +1,13 @@
 package com.powdermonkey.flappytots.game;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 
 import com.powdermonkey.flappytots.AbstractPhysics;
-import com.powdermonkey.flappytots.gameold.FrameSprite;
+import com.powdermonkey.flappytots.geometry.IRegion;
+
+import java.util.List;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
@@ -18,12 +21,13 @@ public class BeePhysics extends AbstractPhysics {
     private final float jump;
     private final float acceleration;
     private final float gacceleration;
+    private final FrameSprite sprite;
+    private final int surfaceHeight;
+
     private long ts;
     private float frame = 0;
     private long imptime;
     private boolean glide;
-    private FrameSprite sprite;
-    private final int surfaceHeight;
 
     public BeePhysics(FrameSprite bee, int height) {
         p = new Point2f(0, 0);
@@ -31,7 +35,7 @@ public class BeePhysics extends AbstractPhysics {
         sprite = bee;
         surfaceHeight = height;
 
-        jump = height / 1.5f; // pixels/sec2
+        jump = height / 2f; //1.5f; // pixels/sec2
         acceleration = height; // pixels/sec2
         gacceleration = acceleration / 3;
         ts = System.currentTimeMillis();
@@ -85,6 +89,11 @@ public class BeePhysics extends AbstractPhysics {
     @Override
     public void draw(Canvas canvas, Paint paint) {
         sprite.draw(canvas, p.x, p.y, paint, (int) frame);
+        List<IRegion> gx = sprite.getRegions().frames.get((int) frame);
+//        for(IRegion r: gx) {
+//            paint.setColor(Color.argb(255, 255, 0, 0));
+//            r.draw(canvas, paint);
+//        }
     }
 
     public void impulse(long ts) {
@@ -95,4 +104,13 @@ public class BeePhysics extends AbstractPhysics {
     public void glide(boolean g) {
         this.glide = g;
     }
+
+    List<IRegion> getRegions() {
+        List<IRegion> gx = sprite.getRegions().frames.get((int) frame);
+        for(IRegion r: gx) {
+            r.move(p);
+        }
+        return gx;
+    }
+
 }

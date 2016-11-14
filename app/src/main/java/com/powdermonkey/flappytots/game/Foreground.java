@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 import com.powdermonkey.flappytots.AbstractPhysics;
-import com.powdermonkey.flappytots.gameold.FrameSprite;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;

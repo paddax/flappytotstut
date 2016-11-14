@@ -12,6 +12,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.powdermonkey.flappytots.R;
+import com.powdermonkey.flappytots.game.FPS;
+import com.powdermonkey.flappytots.game.FrameSprite;
 import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.ArrayList;
@@ -66,7 +68,7 @@ public class FlappyViewOld extends SurfaceView implements Runnable {
         dying[1] = BitmapFactory.decodeResource(this.getResources(), R.drawable.basic_flower_pink_300);
         dying[2] = BitmapFactory.decodeResource(this.getResources(), R.drawable.basic_flower_pink_300);
         dying[3] = BitmapFactory.decodeResource(this.getResources(), R.drawable.basic_flower_pink_300);
-        floor = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.repeatable_floor_300), 3 * 400 / 2, 3 * 238 / 2, 1);
+        floor = new FrameSprite(BitmapFactory.decodeResource(this.getResources(), R.drawable.repeatable_floor_500), 3 * 400 / 2, 3 * 238 / 2, 1);
 
         pighit = new RegionSet(context, R.raw.piggledy_hit);
 

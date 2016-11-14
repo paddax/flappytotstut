@@ -1,13 +1,15 @@
 package com.powdermonkey.flappytots.game;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
-import android.provider.Settings;
 
 import com.powdermonkey.flappytots.AbstractPhysics;
-import com.powdermonkey.flappytots.ISprite;
-import com.powdermonkey.flappytots.gameold.FrameSprite;
+import com.powdermonkey.flappytots.geometry.Circle2dF;
+import com.powdermonkey.flappytots.geometry.IRegion;
+import com.powdermonkey.flappytots.geometry.Rect2dF;
+
+import java.util.List;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
@@ -35,6 +37,10 @@ public class DroopFlowerPhysics extends AbstractPhysics {
     private FrameSprite stem;
     private long ts;
     private int frame;
+    private Circle2dF hit;
+    private Rect2dF fail;
+
+    public enum EHitType { MISS, KISS, result, KILL };
 
     public DroopFlowerPhysics(FrameSprite f, FrameSprite s, Point2f px, Vector2f vx) {
         flower = f;
@@ -44,6 +50,9 @@ public class DroopFlowerPhysics extends AbstractPhysics {
         v = new Vector2f(vx);
         ts = System.currentTimeMillis();
 
+        hit = new Circle2dF(0, 0, f.getWidth(0) / 3 );
+        fail = new Rect2dF(-s.getWidth(0) / 2, f.getHeight(0) / 3, s.getWidth(0) / 2, s.getHeight(0));
+
         stem.setOffset(0, new Point2f(stem.getWidth(0) / 2, 0));
     }
 
@@ -52,6 +61,8 @@ public class DroopFlowerPhysics extends AbstractPhysics {
         float t = (ts - this.ts) / 1000.0f; // number of seconds between updates ?
         p.x += (v.x * t);
         p.y += (v.y * t);
+        hit.move(p);
+        fail.move(p);
 
         this.ts = ts;
 
@@ -67,6 +78,21 @@ public class DroopFlowerPhysics extends AbstractPhysics {
         return flower.getSize(0);
     }
 
+    public EHitType collide(List<? extends IRegion> reg) {
+        EHitType result = EHitType.MISS;
+        for(IRegion r: reg) {
+            if(r.intersect(hit)) {
+                result = EHitType.KISS;
+                frame = 1;
+            }
+            if(r.intersect(fail)) {
+                v.y = v.x * -10;
+                return EHitType.KILL;
+            }
+        }
+        return result;
+    }
+
     @Override
     public Point2f getOffset() {
         return flower.getOffset(0);
@@ -75,6 +101,10 @@ public class DroopFlowerPhysics extends AbstractPhysics {
     @Override
     public void draw(Canvas canvas, Paint paint) {
         stem.draw(canvas, p.x, p.y, paint, 0);
-        flower.draw(canvas, p.x, p.y, paint, 0);
+        flower.draw(canvas, p.x, p.y, paint, frame);
+//        paint.setColor(Color.argb(255, 0, 0, 255));
+//        hit.draw(canvas, paint);
+//        paint.setColor(Color.argb(255, 0, 255, 0));
+//        fail.draw(canvas, paint);
     }
 }

@@ -57,8 +57,4 @@ public interface I2DPhysics {
 
     void draw(Canvas canvas, Paint paint);
 
-    /**
-     * Updates the collision regions of the sprite
-     */
-    void updateRegions();
 }

@@ -6,17 +6,19 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.powdermonkey.flappytots.ISprite;
 import com.powdermonkey.flappytots.R;
-import com.powdermonkey.flappytots.gameold.FPS;
 import com.powdermonkey.flappytots.gameold.FlowerPhysics;
-import com.powdermonkey.flappytots.gameold.FrameSprite;
 import com.powdermonkey.flappytots.gameold.MovingLeft;
+import com.powdermonkey.flappytots.geometry.IRegion;
+import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,6 +35,8 @@ import javax.vecmath.Vector2f;
 public class FlappyView extends SurfaceView implements Runnable {
     private final Paint paint;
     private final SurfaceHolder holder;
+    private final int[] sounds;
+    private final RegionSet beehit;
     private int surfaceWidth;
     private int surfaceHeight;
 
@@ -44,12 +48,6 @@ public class FlappyView extends SurfaceView implements Runnable {
     private int score;
 
 
-    private ArrayList<FlowerPhysics> objects;
-    private boolean hit;
-    private long nextFrame;
-    private Bitmap[] dying = new Bitmap[4];
-    private MovingLeft[] floors;
-    private FrameSprite floor;
     private boolean ready = false;
     private Foreground foreground;
     private List<DroopFlowerPhysics> flowers = new ArrayList<>();
@@ -57,6 +55,8 @@ public class FlappyView extends SurfaceView implements Runnable {
     private FrameSprite stem;
     private FrameSprite beesprite;
     private BeePhysics bee;
+    private SoundPool sp;
+    private MediaPlayer player;
 
 
     public FlappyView(Context context, int res) {
@@ -64,10 +64,15 @@ public class FlappyView extends SurfaceView implements Runnable {
         // Initialize ourHolder and paint objects
         holder = getHolder();
         paint = new Paint();
+        player = MediaPlayer.create(context, R.raw.fruit_machine);
+        player.setLooping(true);
         final Bitmap floorbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.repeatable_floor_500);
         final Bitmap flowerbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower_frames_300);
         final Bitmap stembm = BitmapFactory.decodeResource(this.getResources(), R.drawable.stem);
         final Bitmap beebm =  BitmapFactory.decodeResource(this.getResources(), R.drawable.simple_bee_300);
+        sounds = new int[5];
+        beehit = new RegionSet(context, R.raw.bee_hit);
+
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -83,6 +88,7 @@ public class FlappyView extends SurfaceView implements Runnable {
                 stem = new FrameSprite(stembm, surfaceWidth / 100, surfaceHeight, 1);
                 foreground = new Foreground(floorbm, width, height, 4);
                 beesprite = new FrameSprite(beebm, surfaceWidth / 10, surfaceHeight / 10, 1);
+                beesprite.setRegions(beehit);
                 bee = new BeePhysics(beesprite, surfaceHeight);
                 bee.setPoint(surfaceWidth / 3, surfaceHeight / 2);
                 time = System.currentTimeMillis();
@@ -165,15 +171,19 @@ public class FlappyView extends SurfaceView implements Runnable {
                     Vector2f vx = new Vector2f(-surfaceWidth / 4, 0);
                     DroopFlowerPhysics f = new DroopFlowerPhysics(flower, stem, px, vx);
                     flowers.add(f);
-                    newflower = time + 1000;
+                    newflower = (long) (time + 1000 + Math.random() * 500);
                 }
             }
+
+            List<IRegion> x = bee.getRegions();
 
             for(Iterator<DroopFlowerPhysics> it = flowers.iterator(); it.hasNext();) {
                 DroopFlowerPhysics dfp = it.next();
                 dfp.update(time);
                 if(dfp.getPoint().x < -dfp.getSize().x / 2) {
                     it.remove();
+                } else {
+                    dfp.collide(x);
                 }
             }
 
@@ -185,7 +195,10 @@ public class FlappyView extends SurfaceView implements Runnable {
      * shutdown game thread.
      */
     public void pause() {
-        playing = false;
+        sp.release();
+        player.release();
+
+                playing = false;
         try {
             gameThread.join();
         } catch (InterruptedException e) {
@@ -199,8 +212,20 @@ public class FlappyView extends SurfaceView implements Runnable {
      */
     public void resume() {
         playing = true;
+        player.start();
         gameThread = new Thread(this);
         gameThread.start();
+
+        sp = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        sounds[0] = sp.load(getContext(), R.raw.buzz, 1);
+        sp.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                if (sampleId == sounds[1] && status == 0) {
+                    //sp.play(sounds[1], 0.4f, 0.4f, 0, -1, 1);
+                }
+            }
+        });
     }
 
     @Override
@@ -208,6 +233,7 @@ public class FlappyView extends SurfaceView implements Runnable {
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 bee.impulse(time);
+                sp.play(sounds[0], 0.7f, 0.7f, 0, 0, 1.2f);
                 bee.glide(true);
                 break;
             case MotionEvent.ACTION_UP:

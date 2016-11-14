@@ -22,6 +22,7 @@ public class FlowerPhysics extends AbstractPhysics {
     private float frame;
     private FlowerSprite flower;
     private boolean collision;
+    private RegionSet regions;
 
     public enum ThatsLife {WILTING, GROWING, DYING, DEAD};
     ThatsLife thatsLife;
@@ -118,6 +119,37 @@ public class FlowerPhysics extends AbstractPhysics {
             }
             this.collision = collision;
         }
+    }
+
+    /**
+     * Updates the collision regions of the sprite
+     */
+    public void updateRegions() {
+        for (IRegion r : regions.frames.get(getFrame()))
+            r.move(p);
+    }
+    /**
+     * Lists the currently active regions for the current frame
+     *
+     * @return List of active regions
+     */
+    public List<? extends IRegion> getRegions() {
+        return regions.frames.get(getFrame());
+    }
+    /**
+     * Determines if this object collides with another object
+     *
+     * @param reg Regions of the other object
+     * @return True of the any region overlaps (collides)
+     */
+    public boolean collide(List<? extends IRegion> reg) {
+        for (IRegion r : regions.frames.get(getFrame())) {
+            for (IRegion r1 : reg) {
+                if (r.intersect(r1))
+                    return true;
+            }
+        }
+        return false;
     }
 
     public int getMode() {

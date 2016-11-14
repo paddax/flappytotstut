@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.powdermonkey.flappytots.R;
+import com.powdermonkey.flappytots.game.FPS;
+import com.powdermonkey.flappytots.game.FrameSprite;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;

@@ -1,4 +1,4 @@
-package com.powdermonkey.flappytots.gameold;
+package com.powdermonkey.flappytots.game;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
