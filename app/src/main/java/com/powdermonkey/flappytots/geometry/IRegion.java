@@ -5,6 +5,8 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import javax.vecmath.Point2f;
+
 /**
  * Created by Peter Davis on 07/10/2016.
  */
@@ -34,7 +36,7 @@ public interface IRegion {
      *
      * @param p Location to move to
      */
-    void move(PointF p);
+    void move(Point2f p);
 
     /**
      * Draws the collision

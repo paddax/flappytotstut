@@ -9,6 +9,8 @@ import com.powdermonkey.flappytots.geometry.RegionSet;
 
 import java.util.List;
 
+import javax.vecmath.Point2f;
+
 /**
  * A sprite is an animated bitmap.  Decendents are expected to handle some incoming data determine
  * the collision regions and express frames.
@@ -51,6 +53,22 @@ public interface ISprite {
      * @return width of frame
      */
     int getWidth(int frame);
+
+    /**
+     * Determines the width and height of the specified frame
+     *
+     * @param frame frame of interest
+     * @return size of the specified frame
+     */
+    Point2f getSize(int frame);
+
+    /**
+     * Distance from the top left to the nominal centre of the image
+     *
+     * @param frame frame of interest
+     * @return offset to draw
+     */
+    Point2f getOffset(int frame);
 
     /**
      * Determines the total number of frames in this sprite

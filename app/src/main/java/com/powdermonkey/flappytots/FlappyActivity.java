@@ -1,11 +1,12 @@
 package com.powdermonkey.flappytots;
 
 import android.content.Intent;
+import android.media.AudioManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.powdermonkey.flappytots.game.FlappyView;
-import com.powdermonkey.flappytots.game.GameView;
+import com.powdermonkey.flappytots.gameold.FlappyViewOld;
 
 public class FlappyActivity extends AppCompatActivity {
 
@@ -15,6 +16,7 @@ public class FlappyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
         Intent intent = getIntent();
         int res = intent.getIntExtra(IMAGE_ID, R.drawable.piggledy_colour);
         flappyView = new FlappyView(this, res);

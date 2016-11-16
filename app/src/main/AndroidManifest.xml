@@ -20,7 +20,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".GameActivity" />
-        <activity android:name=".FlappyActivity" android:screenOrientation="landscape"/>
+        <activity android:name=".FlappyActivity"
+            android:screenOrientation="landscape"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

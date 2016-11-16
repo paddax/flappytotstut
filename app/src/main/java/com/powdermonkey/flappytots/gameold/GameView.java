@@ -1,11 +1,10 @@
-package com.powdermonkey.flappytots.game;
+package com.powdermonkey.flappytots.gameold;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -17,6 +16,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.powdermonkey.flappytots.R;
+import com.powdermonkey.flappytots.game.FPS;
+import com.powdermonkey.flappytots.game.FrameSprite;
+
+import javax.vecmath.Point2f;
+import javax.vecmath.Vector2f;
 
 /**
  * Game view
@@ -108,7 +112,7 @@ public class GameView extends SurfaceView implements Runnable {
             synchronized (physics) {
                 for (I2DPhysics phys : physics) {
                     //paint.setAlpha(somefunction);
-                    PointF p = phys.getPoint();
+                    Point2f p = phys.getPoint();
                     pig.draw(canvas, p.x, p.y, paint, phys.getFrame());
                     //flower.draw(canvas, p.x, p.y, paint, phys.getFrame());
                 }
@@ -129,16 +133,16 @@ public class GameView extends SurfaceView implements Runnable {
             for (Iterator<I2DPhysics> iterator = physics.iterator(); iterator.hasNext(); ) {
                 I2DPhysics fcf = iterator.next();
                 if(fcf.getPoint().x > surfaceWidth) {
-                    PointF v = fcf.getVector();
+                    Vector2f v = fcf.getVector();
                     fcf.setVector(-v.x, v.y);
-                    v = fcf.getPoint();
-                    fcf.setPoint(surfaceWidth, v.y);
+                    Point2f p = fcf.getPoint();
+                    fcf.setPoint(surfaceWidth, p.y);
                 }
                 if(fcf.getPoint().x < 0) {
-                    PointF v = fcf.getVector();
+                    Vector2f v = fcf.getVector();
                     fcf.setVector(-v.x, v.y);
-                    v = fcf.getPoint();
-                    fcf.setPoint(0, v.y);
+                    Point2f p = fcf.getPoint();
+                    fcf.setPoint(0, p.y);
                 }
                 fcf.update(time);
                 if (fcf.getPoint().y > surfaceHeight + flower.getHeight(fcf.getFrame())) {

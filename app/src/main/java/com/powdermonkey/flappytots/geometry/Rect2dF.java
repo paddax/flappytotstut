@@ -5,6 +5,8 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import javax.vecmath.Point2f;
+
 /**
  * Created by Peter Davis on 08/10/2016.
  */
@@ -39,7 +41,7 @@ public class Rect2dF implements IRegion {
     }
 
     @Override
-    public void move(PointF p) {
+    public void move(Point2f p) {
         this.move(p.x, p.y);
     }
 

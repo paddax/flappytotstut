@@ -4,6 +4,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
+import javax.vecmath.Point2f;
+import javax.vecmath.Vector2f;
+
 /**
  * Created by Peter Davis on 06/10/2016.
  */
@@ -19,9 +22,9 @@ public interface I2DPhysics {
      * Location of object
      * @return curent location
      */
-    PointF getPoint();
+    Point2f getPoint();
 
-    PointF getVector();
+    Vector2f getVector();
 
     /**
      * Sets the active vector of the sprite
@@ -39,14 +42,19 @@ public interface I2DPhysics {
 
     void setPoint(float x, float y);
 
-    ISprite getSprite();
+    /**
+     * Width and height of the current frame
+     * @return
+     */
+    Point2f getSize();
 
-    void setSprite(ISprite sprite);
+    /**
+     * Offset from the specified location to the to top left of sprite (current frame)
+     * @return
+     */
+    Point2f getOffset();
+
 
     void draw(Canvas canvas, Paint paint);
 
-    /**
-     * Updates the collision regions of the sprite
-     */
-    void updateRegions();
 }
