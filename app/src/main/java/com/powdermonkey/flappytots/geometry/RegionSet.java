@@ -1,6 +1,8 @@
 package com.powdermonkey.flappytots.geometry;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -12,6 +14,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.vecmath.Point2f;
 
 /**
  * List of list of regions for collision detection
@@ -104,5 +108,25 @@ public class RegionSet {
                 r.offset(x, y);
             }
         }
+    }
+
+    public void move(int frame, Point2f p) {
+        for(IRegion r: frames.get(frame)) {
+            r.move(p);
+        }
+    }
+
+    public void draw(int frame, Canvas canvas, Paint paint) {
+        for(IRegion r: frames.get(frame)) {
+            r.draw(canvas, paint);
+        }
+    }
+
+    public boolean intersect(int frame, IRegion test) {
+        for(IRegion r: frames.get(frame)) {
+            if(test.intersect(r))
+                return true;
+        }
+        return false;
     }
 }

@@ -16,6 +16,13 @@ android {
             enabled true
         }*/
     }
+
+    android {
+        lintOptions {
+            abortOnError false
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

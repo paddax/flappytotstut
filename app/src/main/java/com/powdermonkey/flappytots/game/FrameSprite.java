@@ -100,14 +100,19 @@ public class FrameSprite implements ISprite {
     }
 
     public void setRegions(RegionSet regions) {
-        this.collision = regions;
-        this.collision.scale(size.x / (rawImageWidth / getFrameCount()), size.y / rawImageHeight);
-        this.collision.offset(size.x / -2.0f, size.y / -2.0f);
         if(collision.frames.size() < getFrameCount())
             throw new RuntimeException("Invalid frame count");
+        this.collision = regions;
+        this.collision.scale(size.x / (rawImageWidth / getFrameCount()), size.y / rawImageHeight);
+        for(int i=0; i<getFrameCount(); i++) {
+            this.collision.offset(i, -offset[i].x, -offset[i].y);
+        }
     }
 
     public void setOffset(int frame, Point2f o) {
+        Point2f x = new Point2f(offset[frame]);
+        x.sub(o);
+        this.collision.offset(frame, x.x, x.y);
         offset[frame].set(o);
     }
 }

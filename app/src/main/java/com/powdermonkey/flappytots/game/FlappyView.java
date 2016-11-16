@@ -37,6 +37,7 @@ public class FlappyView extends SurfaceView implements Runnable {
     private final SurfaceHolder holder;
     private final int[] sounds;
     private final RegionSet beehit;
+    private final RegionSet flowerhit;
     private int surfaceWidth;
     private int surfaceHeight;
 
@@ -72,7 +73,7 @@ public class FlappyView extends SurfaceView implements Runnable {
         final Bitmap beebm =  BitmapFactory.decodeResource(this.getResources(), R.drawable.simple_bee_300);
         sounds = new int[5];
         beehit = new RegionSet(context, R.raw.bee_hit);
-
+        flowerhit = new RegionSet(context, R.raw.flower_hit);
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -84,7 +85,8 @@ public class FlappyView extends SurfaceView implements Runnable {
                 surfaceWidth = width;
                 surfaceHeight = height;
 
-                flower = new FrameSprite(flowerbm, surfaceWidth / 10, surfaceHeight / 10, 2);
+                flower = new FrameSprite(flowerbm, surfaceWidth / 14, surfaceHeight / 10, 2);
+                flower.setRegions(flowerhit);
                 stem = new FrameSprite(stembm, surfaceWidth / 100, surfaceHeight, 1);
                 foreground = new Foreground(floorbm, width, height, 4);
                 beesprite = new FrameSprite(beebm, surfaceWidth / 10, surfaceHeight / 10, 1);
