@@ -40,8 +40,13 @@ public class DroopFlowerPhysics extends AbstractPhysics {
     private long ts;
     private int frame;
     private Rect2dF fail;
+    private EHitType state;
 
-    public enum EHitType { MISS, KISS, KILL };
+    public EHitType getState() {
+        return state;
+    }
+
+    public enum EHitType { MISS, KISS, KILL }
 
     public DroopFlowerPhysics(FrameSprite f, FrameSprite s, Point2f px, Vector2f vx) {
         flower = f;
@@ -51,8 +56,9 @@ public class DroopFlowerPhysics extends AbstractPhysics {
         v = new Vector2f(vx);
         ts = System.currentTimeMillis();
         flowhit = f.getRegions();
+        state = EHitType.MISS;
 
-        fail = new Rect2dF(-s.getWidth(0) / 2, f.getHeight(0) / 3, s.getWidth(0) / 2, s.getHeight(0));
+        fail = new Rect2dF(-s.getWidth(0) / 2, f.getHeight(0) / 2, s.getWidth(0) / 2, s.getHeight(0));
         stem.setOffset(0, new Point2f(stem.getWidth(0) / 2, 0));
     }
 
@@ -79,18 +85,20 @@ public class DroopFlowerPhysics extends AbstractPhysics {
     }
 
     public EHitType collide(List<? extends IRegion> reg) {
-        EHitType result = EHitType.MISS;
-        for(IRegion r: reg) {
-            if(flowhit.intersect(frame, r)) {
-                result = EHitType.KISS;
-                frame = 1;
-            }
-            if(r.intersect(fail)) {
-                v.y = v.x * -10;
-                return EHitType.KILL;
+        if(state != EHitType.KILL) {
+            for (IRegion r : reg) {
+                if (flowhit.intersect(frame, r)) {
+                    state = EHitType.KISS;
+                    frame = 1;
+                }
+                if (r.intersect(fail)) {
+                    v.y = v.x * -10;
+                    state = EHitType.KILL;
+                    return state;
+                }
             }
         }
-        return result;
+        return state;
     }
 
     @Override

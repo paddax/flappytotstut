@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.powdermonkey.flappytots.game.FlappyView;
-import com.powdermonkey.flappytots.gameold.FlappyViewOld;
 
 public class FlappyActivity extends AppCompatActivity {
 

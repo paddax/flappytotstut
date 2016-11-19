@@ -9,14 +9,14 @@ import android.graphics.Paint;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.powdermonkey.flappytots.R;
-import com.powdermonkey.flappytots.gameold.FlowerPhysics;
-import com.powdermonkey.flappytots.gameold.MovingLeft;
 import com.powdermonkey.flappytots.geometry.IRegion;
 import com.powdermonkey.flappytots.geometry.RegionSet;
 
@@ -26,6 +26,9 @@ import java.util.List;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
+
+import static com.powdermonkey.flappytots.game.DroopFlowerPhysics.*;
+import static com.powdermonkey.flappytots.game.DroopFlowerPhysics.EHitType.*;
 
 /**
  * Game view
@@ -38,6 +41,8 @@ public class FlappyView extends SurfaceView implements Runnable {
     private final int[] sounds;
     private final RegionSet beehit;
     private final RegionSet flowerhit;
+    private final GestureDetectorCompat mDetector;
+    private final GestureDetector.SimpleOnGestureListener flingDetector;
     private int surfaceWidth;
     private int surfaceHeight;
 
@@ -58,7 +63,7 @@ public class FlappyView extends SurfaceView implements Runnable {
     private BeePhysics bee;
     private SoundPool sp;
     private MediaPlayer player;
-
+    private static final String TAG = "FlappyTot";
 
     public FlappyView(Context context, int res) {
         super(context);
@@ -70,10 +75,21 @@ public class FlappyView extends SurfaceView implements Runnable {
         final Bitmap floorbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.repeatable_floor_500);
         final Bitmap flowerbm = BitmapFactory.decodeResource(this.getResources(), R.drawable.flower_frames_300);
         final Bitmap stembm = BitmapFactory.decodeResource(this.getResources(), R.drawable.stem);
-        final Bitmap beebm =  BitmapFactory.decodeResource(this.getResources(), R.drawable.simple_bee_300);
+        final Bitmap beebm =  BitmapFactory.decodeResource(this.getResources(), R.drawable.bee_animation);
         sounds = new int[5];
         beehit = new RegionSet(context, R.raw.bee_hit);
         flowerhit = new RegionSet(context, R.raw.flower_hit);
+        flingDetector = new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                Log.d(TAG, "FLING: " + velocityX + " " + velocityY);
+                if(Math.abs(velocityX) > 900) {
+                    bee.loop();
+                }
+                return true;
+            }
+        };
+        mDetector = new GestureDetectorCompat(context, flingDetector);
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -89,7 +105,7 @@ public class FlappyView extends SurfaceView implements Runnable {
                 flower.setRegions(flowerhit);
                 stem = new FrameSprite(stembm, surfaceWidth / 100, surfaceHeight, 1);
                 foreground = new Foreground(floorbm, width, height, 4);
-                beesprite = new FrameSprite(beebm, surfaceWidth / 10, surfaceHeight / 10, 1);
+                beesprite = new FrameSprite(beebm, surfaceWidth / 10, surfaceHeight / 6, 4);
                 beesprite.setRegions(beehit);
                 bee = new BeePhysics(beesprite, surfaceHeight);
                 bee.setPoint(surfaceWidth / 3, surfaceHeight / 2);
@@ -137,13 +153,12 @@ public class FlappyView extends SurfaceView implements Runnable {
             paint.setTextSize(45);
             paint.setDither(true);
             paint.setAntiAlias(true);
-            paint.setColor(Color.argb(255, 156, 112, 233));
-            paint.setStyle(Paint.Style.STROKE);
-            canvas.drawText("SCORE:" + score, 20, 40, paint);
+            paint.setColor(Color.argb(255, 15, 11, 23));
+            //paint.setStyle(Paint.Style.STROKE);
 
             paint.setAlpha(255);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
-
+            canvas.drawText("SCORE:" + score, 20, 40, paint);
             foreground.draw(canvas, paint);
 
             synchronized (flowers) {
@@ -151,6 +166,7 @@ public class FlappyView extends SurfaceView implements Runnable {
                     dfp.draw(canvas, paint);
                 }
             }
+            canvas.drawText("FPS: " + String.format("%.1f", framesPerSecond), 20, surfaceHeight - surfaceHeight / 5, paint);
             bee.draw(canvas, paint);
             // Draw everything to the screen
             holder.unlockCanvasAndPost(canvas);
@@ -169,7 +185,7 @@ public class FlappyView extends SurfaceView implements Runnable {
 
             synchronized (flowers) {
                 if (time > newflower) {
-                    Point2f px = new Point2f(surfaceWidth + 100, (float) ((Math.random() * surfaceHeight / 2) + (surfaceHeight / 10)));
+                    Point2f px = new Point2f(surfaceWidth + 100, (float) ((Math.random() * surfaceHeight / 2) + (surfaceHeight / 7)));
                     Vector2f vx = new Vector2f(-surfaceWidth / 4, 0);
                     DroopFlowerPhysics f = new DroopFlowerPhysics(flower, stem, px, vx);
                     flowers.add(f);
@@ -184,8 +200,21 @@ public class FlappyView extends SurfaceView implements Runnable {
                 dfp.update(time);
                 if(dfp.getPoint().x < -dfp.getSize().x / 2) {
                     it.remove();
+                    switch(dfp.getState()) {
+                        case MISS:
+                            score -= 1;
+                            break;
+                        case KISS:
+                            score += 3;
+                            break;
+                        case KILL:
+                            score -= 2;
+                            break;
+                    }
                 } else {
-                    dfp.collide(x);
+                    if(dfp.collide(x) == KILL) {
+                        bee.sad();
+                    }
                 }
             }
 
@@ -232,6 +261,7 @@ public class FlappyView extends SurfaceView implements Runnable {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        this.mDetector.onTouchEvent(event);
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 bee.impulse(time);

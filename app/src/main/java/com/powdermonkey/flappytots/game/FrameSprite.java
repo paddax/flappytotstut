@@ -63,9 +63,10 @@ public class FrameSprite implements ISprite {
 
     @Override
     public void draw(Canvas canvas, float x, float y, Paint paint, int frame) {
-        int i = frame % frameCount;
-        from.left = (int) (i * size.x);
+        frame = frame % frameCount;
+        from.left = (int) (frame * size.x);
         from.right = (int) (from.left + size.x);
+
 
         int nx = (int) (x - offset[frame].x);
         int ny = (int)(y - offset[frame].y);
