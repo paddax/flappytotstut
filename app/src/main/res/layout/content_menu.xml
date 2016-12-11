@@ -32,4 +32,13 @@
         android:id="@+id/run_button"
         android:layout_below="@+id/flappy_button"
         android:layout_alignStart="@+id/flappy_button" />
+
+    <Button
+        android:text="Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/run_button"
+        android:layout_marginBottom="12dp"
+        android:id="@+id/button" />
 </RelativeLayout>
